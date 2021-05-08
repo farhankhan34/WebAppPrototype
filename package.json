@@ -1,0 +1,31 @@
+{
+  "name": "webappprototype",
+  "version": "1.0.0",
+  "description": "I'll be creating my DECO2017 assignment on this web server",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farhankhan34/WebAppPrototype.git"
+  },
+  "keywords": [
+    "DECO2017",
+    "Design",
+    "Farhan",
+    "Study",
+    "Application",
+    "HD"
+  ],
+  "author": "Farhan Khan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/farhankhan34/WebAppPrototype/issues"
+  },
+  "homepage": "https://github.com/farhankhan34/WebAppPrototype#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
