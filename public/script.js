@@ -38,7 +38,7 @@ function reverseString(str) {
  Log this array out to the console, showing that it works for a single task, with hard-coded input parameters. Next week we will look at how to populate these parameters with user input.*/
 let aPlaceToShow = document.getElementById("allTasks");
 
-taskList = []; //3.1
+let taskList = []; //3.1
 
 function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
   var task = {
@@ -109,6 +109,7 @@ function renderTask(task){
 
 /***************************** 11 May 2021  ************************/
 /*************** CREATING ALL BOARDS  ******************************/
+/*
 let allBoards = [{
       "label": "To Do"
     },
@@ -122,23 +123,68 @@ let allBoards = [{
       "label": "Done"
     }
   ];
+  */
 
     /******** RENDERING */
-    let container = document.getElementById("container");
+   // let container = document.getElementById("container");
+    
 
-    allBoards.forEach(function(board){
-      //console.log(board.label);
+    // allBoards.forEach(function(board){
+    //   //console.log(board.label);
 
-      /* add a swimline (column) as a board */
-      let boardLane =  document.createElement('div');
-      boardLane.setAttribute('class','board');
+    //   /* add a swimline (column) as a board */
+    //   let boardLane =  document.createElement('div');
+    //   boardLane.setAttribute('class','board');
 
-      /* add a label for the board */ 
-      let boardLabel =  document.createElement('div');
-      boardLabel.setAttribute('class','label');
-      boardLabel.innerHTML = board.label;
+    //   /* add a label for the board */ 
+    //   let boardLabel =  document.createElement('div');
+    //   boardLabel.setAttribute('class','label');
+    //   boardLabel.innerHTML = board.label;
 
-      boardLane.appendChild(boardLabel);
-      container.appendChild(boardLane);
+    //   boardLane.appendChild(boardLabel);
+    //   container.appendChild(boardLane);
    
-    });
+    // });
+
+  // import Board from './scripts/board';
+
+  class Board {
+    constructor(name) {
+        this.name = name;          
+    }
+    render(container){
+          /* add a swimline (column) as a board */
+        let boardLane =  document.createElement('div');
+        boardLane.setAttribute('class','board');
+
+        /* add a label for the board */ 
+        let boardLabel =  document.createElement('div');
+        boardLabel.setAttribute('class','label');
+        boardLabel.innerHTML =  this.name;
+
+        boardLane.appendChild(boardLabel);
+        container.appendChild(boardLane);
+    }    
+}
+
+
+   
+
+  let container = document.getElementById("container");
+
+  let allBoards = [];
+  
+  var todoBoard = new Board('Todo');
+  allBoards.push(todoBoard);
+  var doingBoard = new Board('Doing');
+  allBoards.push(doingBoard);
+  var doneBoard = new Board('Done');
+  allBoards.push(doneBoard);
+
+  allBoards.forEach(function(board){
+    board.render(container);
+  });
+  
+ 
+  
+  

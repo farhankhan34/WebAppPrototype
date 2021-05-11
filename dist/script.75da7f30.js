@@ -118,6 +118,12 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"script.js":[function(require,module,exports) {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 //method 1
 
 /*function reverseString(str) {
@@ -155,7 +161,7 @@ function reverseString(str) {
 
  Log this array out to the console, showing that it works for a single task, with hard-coded input parameters. Next week we will look at how to populate these parameters with user input.*/
 var aPlaceToShow = document.getElementById("allTasks");
-taskList = []; //3.1
+var taskList = []; //3.1
 
 function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
   var task = {
@@ -209,32 +215,75 @@ function renderTask(task) {
 
 /*************** CREATING ALL BOARDS  ******************************/
 
+/*
+let allBoards = [{
+      "label": "To Do"
+    },
+    {
+      "label": "Doing"
+    },
+    {
+      "label": "Review"
+    },
+    {
+      "label": "Done"
+    }
+  ];
+  */
 
-var allBoards = [{
-  "label": "To Do"
-}, {
-  "label": "Doing"
-}, {
-  "label": "Review"
-}, {
-  "label": "Done"
-}];
 /******** RENDERING */
+// let container = document.getElementById("container");
+// allBoards.forEach(function(board){
+//   //console.log(board.label);
+//   /* add a swimline (column) as a board */
+//   let boardLane =  document.createElement('div');
+//   boardLane.setAttribute('class','board');
+//   /* add a label for the board */ 
+//   let boardLabel =  document.createElement('div');
+//   boardLabel.setAttribute('class','label');
+//   boardLabel.innerHTML = board.label;
+//   boardLane.appendChild(boardLabel);
+//   container.appendChild(boardLane);
+// });
+// import Board from './scripts/board';
+
+
+var Board = /*#__PURE__*/function () {
+  function Board(name) {
+    _classCallCheck(this, Board);
+
+    this.name = name;
+  }
+
+  _createClass(Board, [{
+    key: "render",
+    value: function render(container) {
+      /* add a swimline (column) as a board */
+      var boardLane = document.createElement('div');
+      boardLane.setAttribute('class', 'board');
+      /* add a label for the board */
+
+      var boardLabel = document.createElement('div');
+      boardLabel.setAttribute('class', 'label');
+      boardLabel.innerHTML = this.name;
+      boardLane.appendChild(boardLabel);
+      container.appendChild(boardLane);
+    }
+  }]);
+
+  return Board;
+}();
 
 var container = document.getElementById("container");
+var allBoards = [];
+var todoBoard = new Board('Todo');
+allBoards.push(todoBoard);
+var doingBoard = new Board('Doing');
+allBoards.push(doingBoard);
+var doneBoard = new Board('Done');
+allBoards.push(doneBoard);
 allBoards.forEach(function (board) {
-  //console.log(board.label);
-
-  /* add a swimline (column) as a board */
-  var boardLane = document.createElement('div');
-  boardLane.setAttribute('class', 'board');
-  /* add a label for the board */
-
-  var boardLabel = document.createElement('div');
-  boardLabel.setAttribute('class', 'label');
-  boardLabel.innerHTML = board.label;
-  boardLane.appendChild(boardLabel);
-  container.appendChild(boardLane);
+  board.render(container);
 });
 },{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
@@ -264,7 +313,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53048" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55781" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
