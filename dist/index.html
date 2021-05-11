@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>repl.it</title>    
+    <link href="/main.77bb5cfd.css" rel="stylesheet" type="text/css">
+  <script src="/main.77bb5cfd.js"></script></head>
+  <body>
+    <div id="container" class="container"></div>
+
+    <form id="taskForm">
+        <label for="taskName">Task name:</label><br>
+        <input type="text" id="taskName" name="taskName">
+        <br>
+        <!-- Date input -->
+        <label for="dueDate">Due Date: </label>
+        <input type="date" id="dueDate">
+        <br>
+
+        <!-- Estimated time for completion -->
+        <label for="eta">Estimated time for completion(m)</label>
+        <input type="time" name="eta" id="etaInput">
+        <br>
+
+        <!-- Completion Time imput -->
+        <label for="completionTime">Time taken to complete: </label>
+        <input type="number" name="completionTime" id="completionTimeInput">
+        <br>
+
+        <!-- Task Priority -->
+        <!-- <input type="number" name="priority" id="priorityInput"> -->
+
+
+        <label for="priority">Task Priority:</label>
+        <select name="priority" id="priorityInput">
+          <option value="">Select one</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+
+
+
+        
+
+        <input type="button" name="submitTask" id="submitTaskPress" value="Add">
+    </form>
+    <div id="allTasks"></div>
+
+
+
+    <script src="/script.75da7f30.js"></script>
+  </body>
+</html>

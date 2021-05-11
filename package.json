@@ -2,10 +2,12 @@
   "name": "webappprototype",
   "version": "1.0.0",
   "description": "I'll be creating my DECO2017 assignment on this web server",
-  "main": "script.js",
+  "main": "dist/index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "prestart": "parcel build ./public/index.html",
+    "dev": "parcel serve ./public/index.html"
   },
   "repository": {
     "type": "git",
@@ -26,6 +28,10 @@
   },
   "homepage": "https://github.com/farhankhan34/WebAppPrototype#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "sass": "^1.32.12"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.5"
   }
 }
