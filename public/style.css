@@ -54,3 +54,13 @@
 .card button:active, .card button:focus {
     outline: 0;
 }
+
+.task-form {  
+  border: 3px solid black;
+  margin: auto;
+  position: fixed;
+  top: 20px;
+  left: 400px;
+  background-color: bisque;
+  padding: 5em;
+}

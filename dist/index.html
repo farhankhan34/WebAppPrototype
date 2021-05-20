@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width">
     <title>repl.it</title>    
     <link href="/main.77bb5cfd.css" rel="stylesheet" type="text/css">
-    <script src="/board.af0aecb3.js"></script>
+    
     
   <script src="/main.77bb5cfd.js"></script></head>
   <body>
     <div id="container" class="container"></div>
 
+    
+    <input type="button" id="show-hide-task-form" value="+">
+
+    <div id="taskEntryForm" class="task-form">
     <form id="taskForm">
         <label for="taskName">Task name:</label><br>
         <input type="text" id="taskName" name="taskName">
@@ -46,10 +50,13 @@
 
         
 
-        <input type="button" name="submitTask" id="submitTaskPress" value="Add">
+        <input type="button" name="addTask" id="addTask" value="Add">
     </form>
-    <div id="allTasks"></div>
+  </div>
 
+
+    <div id="allTasks"></div>
+    <script src="/board.af0aecb3.js"></script>
     <script src="/script.75da7f30.js"></script>   
   </body>
 </html>

@@ -117,39 +117,198 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"scripts/board.js":[function(require,module,exports) {
+})({"scripts/task.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var Task = /*#__PURE__*/function () {
+  /************************************************************************
+   *      specific to the object instances                                *
+   *                                                                      */
+  function Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container) {
+    _classCallCheck(this, Task);
+
+    this.taskName = $taskName;
+    this.dueDate = $dueDate, this.eta = $eta;
+    this.completionTime = $completionTime;
+    this.priority = $priority;
+    this.completionStatus = $completionStatus;
+    this.container = $container; // Give a unique id for each task
+
+    this.taskID = Task.allTasks.length + 1;
+  }
+
+  _createClass(Task, [{
+    key: "render",
+    value: function render() {
+      var taskDiv = document.createElement('div');
+      taskDiv.setAttribute('class', 'card');
+      var taskText = document.createElement('h3');
+      taskText.textContent = this.taskName;
+      taskDiv.appendChild(taskText);
+      var taskDate = document.createElement('p');
+      taskDate.textContent = this.dueDate;
+      taskDiv.appendChild(taskDate);
+      var deleteButton = document.createElement('button');
+      deleteButton.textContent = "Delete Task";
+      /* I need a reference of the task object(this) that created this delete button */
+
+      /* taskObject is to remeber this when we move out of the context */
+
+      deleteButton.taskObject = this;
+      deleteButton.addEventListener('click', Task.removeTask, false);
+      taskDiv.appendChild(deleteButton);
+      this.container.appendChild(taskDiv);
+    }
+  }, {
+    key: "unRender",
+    value: function unRender() {
+      this.container.innerHTML = '';
+    }
+  }], [{
+    key: "add",
+    value:
+    /************************************************************************
+     *      static is common to all instances since they're called          *
+     *      on the class itself.                                            */
+    function add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container) {
+      /* create a new task using the supplied info */
+      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container); //newTask.unRender();
+
+      newTask.render();
+      /* add the newly created task into the task list */
+
+      Task.allTasks.push(newTask);
+    }
+  }, {
+    key: "renderAll",
+    value: function renderAll() {
+      // let container = document.getElementById();
+      Task.allTasks.forEach(function (task) {
+        task.render();
+      });
+    }
+  }, {
+    key: "unrenderAll",
+    value: function unrenderAll() {
+      // let container = document.getElementById();
+      Task.allTasks.forEach(function (task) {
+        task.unRender();
+      });
+    }
+  }, {
+    key: "removeTask",
+    value: function removeTask($event) {
+      console.log($event);
+      console.log($event.currentTarget);
+      console.log($event.currentTarget.taskObject); //alert("Delete Task '" + $event.currentTarget.taskID + "' ?");
+      //Task.allTasks.pop();
+
+      /*
+              const result = Task.allTasks.filter(task => task.taskID != $event.currentTarget.taskObject.taskID);
+      
+              Task.allTasks = result;
+      
+              Task.unrenderAll();
+              Task.renderAll();
+        */
+    }
+  }]);
+
+  return Task;
+}();
+
+exports.default = Task;
+
+_defineProperty(Task, "allTasks", []);
+},{}],"scripts/board.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _task = _interopRequireDefault(require("./task"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var Board = /*#__PURE__*/function () {
+  /************************************************************************
+   *      specific to the object instances                                *
+   *                                                                      */
   function Board(name) {
     _classCallCheck(this, Board);
 
+    /* add a swimline (column) as a board */
+    this.boardLane = document.createElement('div');
+    this.boardLane.setAttribute('class', 'board');
     this.name = name;
   }
 
   _createClass(Board, [{
+    key: "addTask",
+    value: function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
+      _task.default.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, this.boardLane);
+    }
+  }, {
     key: "render",
     value: function render(container) {
-      /* add a swimline (column) as a board */
-      var boardLane = document.createElement('div');
-      boardLane.setAttribute('class', 'board');
       /* add a label for the board */
-
       var boardLabel = document.createElement('div');
       boardLabel.setAttribute('class', 'label');
       boardLabel.innerHTML = this.name;
-      boardLane.appendChild(boardLabel);
-      container.appendChild(boardLane);
+      this.boardLane.appendChild(boardLabel);
+      container.appendChild(this.boardLane);
+    }
+  }], [{
+    key: "add",
+    value:
+    /************************************************************************
+     *      static is common to all instances                               *
+     *                                                                      */
+    function add(name) {
+      var newBoard = new Board(name);
+      Board.allBoards.push(newBoard);
+      return newBoard;
+    }
+  }, {
+    key: "renderAll",
+    value: function renderAll($containerId) {
+      var container = document.getElementById($containerId);
+      Board.allBoards.forEach(function (board) {
+        board.render(container);
+      });
     }
   }]);
 
   return Board;
 }();
-},{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+
+exports.default = Board;
+
+_defineProperty(Board, "allBoards", []);
+},{"./task":"scripts/task.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -177,7 +336,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55781" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62618" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
