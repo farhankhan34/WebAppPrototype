@@ -18,16 +18,22 @@ export default class Board {
           });
     }  
 
+    static taskAddUI($event){
+        //alert($event.currentTarget.boardObject.name);
+        Task.taskAddForm($event.currentTarget.boardObject);
+        
+    }
     
     /************************************************************************
      *      specific to the object instances                                *
      *                                                                      */
     constructor(name) {
-           /* add a swimline (column) as a board */
-        this.boardLane =  document.createElement('div');
-        this.boardLane.setAttribute('class','board');
+          
 
         this.name = name;
+        if(Task.allBoards){
+        this.boardID = Task.allBoards.length + 1;
+        }
                   
     }
 
@@ -47,12 +53,15 @@ export default class Board {
             $completionTime, 
             $priority, 
             $completionStatus,
-            this.boardLane);
+            this);
             
     }
 
     render(container)  {
      
+ /* add a swimline (column) as a board */
+        this.boardLane =  document.createElement('div');
+        this.boardLane.setAttribute('class','board');
 
         /* add a label for the board */ 
         let boardLabel =  document.createElement('div');
@@ -60,6 +69,18 @@ export default class Board {
         boardLabel.innerHTML =  this.name;
 
         this.boardLane.appendChild(boardLabel);
+        
+
+        /* add a Task Add button for the borard */
+        /* <input type="button" name="addTask" id="addTask" value="Add"> */
+
+        let addTaskButton = document.createElement('button');
+        addTaskButton.textContent = "+";                
+        addTaskButton.boardObject = this;
+        addTaskButton.addEventListener('click',Board.taskAddUI,false);        
+        this.boardLane.appendChild(addTaskButton);
+
         container.appendChild(this.boardLane);
+
     }
 }

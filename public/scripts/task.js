@@ -12,7 +12,7 @@ export default class Task {
                 $completionTime, 
                 $priority, 
                 $completionStatus,
-                $container)
+                $board)
                 {
                     /* create a new task using the supplied info */
                 var newTask = new Task( $taskName, 
@@ -21,13 +21,22 @@ export default class Task {
                                         $completionTime, 
                                         $priority, 
                                         $completionStatus,
-                                        $container);
+                                        $board);
                 
                 //newTask.unRender();
-                newTask.render();
+               // newTask.render();
                 /* add the newly created task into the task list */        
                 Task.allTasks.push(newTask);
+
+                alert(Task.allTasks.length);
+
+                if(Task.allTasks.length <5)    newTask.render();
+                return true;
+
+                //Task.unrenderAll();
+                //Task.renderAll();
     }
+
     static renderAll(){
        // let container = document.getElementById();
         Task.allTasks.forEach(function(task){
@@ -44,22 +53,48 @@ export default class Task {
 
     static removeTask($event){        
         
-        console.log($event);
-        console.log($event.currentTarget);
-        console.log($event.currentTarget.taskObject);
+       // console.log($event);
+       // console.log($event.currentTarget);
+       // console.log($event.currentTarget.taskObject);
 
-        //alert("Delete Task '" + $event.currentTarget.taskID + "' ?");
+        alert("Delete Task '" + $event.currentTarget.taskID + "' ?");
         //Task.allTasks.pop();
 
-/*
+
         const result = Task.allTasks.filter(task => task.taskID != $event.currentTarget.taskObject.taskID);
 
         Task.allTasks = result;
 
         Task.unrenderAll();
         Task.renderAll();
-  */      
+       
     }
+
+    static saveTask($event){        
+        
+        
+
+         let $taskName = "TEST1";// document.getElementById("taskName").value; 
+         let $dueDate = "12/02/2022";//document.getElementById("dueDate").value;
+         let $eta = "3days";
+         let $completionTime = ""; 
+         let $priority = "3";
+         let $completionStatus = "new";
+
+         
+         Task.add(
+            $taskName, 
+            $dueDate, 
+            $eta, 
+            $completionTime, 
+            $priority, 
+            $completionStatus,
+            $event.currentTarget.boardObject);
+            
+
+            
+        
+     }
 
     /************************************************************************
      *      specific to the object instances                                *
@@ -71,7 +106,7 @@ export default class Task {
         $completionTime, 
         $priority, 
         $completionStatus,
-        $container)
+        $board)
         {
         this.taskName = $taskName;
         this.dueDate = $dueDate,
@@ -79,7 +114,7 @@ export default class Task {
         this.completionTime = $completionTime;
         this.priority = $priority;
         this.completionStatus = $completionStatus;
-        this.container = $container;
+        this.board = $board;
         // Give a unique id for each task
         this.taskID = Task.allTasks.length + 1;
 
@@ -88,6 +123,7 @@ export default class Task {
  
 
     render()  {      
+
 
 
         let taskDiv =  document.createElement('div');
@@ -111,12 +147,58 @@ export default class Task {
         deleteButton.addEventListener('click',Task.removeTask,false);        
         taskDiv.appendChild(deleteButton);
 
-        this.container.appendChild(taskDiv);
+        this.board.boardLane.appendChild(taskDiv);
+
+       // alert('Rendered!');
+        
 
     }
 
     unRender() {
 
-        this.container.innerHTML = '';
+        //this.container.innerHTML = '';
+    }
+
+  static taskAddForm($theBoard){
+      
+    alert('Created by ' + $theBoard.name) ;
+
+        let cardDiv =  document.createElement('div');
+        cardDiv.setAttribute('class','card card-form-div');
+
+        let cardForm = document.createElement('form');
+        cardForm.setAttribute ('id', 'cardForm');
+        cardDiv.appendChild(cardForm);
+
+        let cardName = document.createElement('input');
+        cardName.setAttribute ('id', 'cardName');
+        cardName.setAttribute('type','text');
+        cardForm.appendChild(cardName);
+
+        let cardDueDate = document.createElement('input');
+        cardDueDate.setAttribute('id','CardDueDate');
+        cardDueDate.setAttribute('type','date');
+        cardForm.appendChild(cardDueDate);
+
+        let cardETA = document.createElement('input');
+        cardETA.setAttribute('id','cardETA');
+        cardETA.setAttribute('type','date');
+        cardForm.appendChild(cardETA);
+
+        let cardCompletionTime = document.createElement('input');
+        cardCompletionTime.setAttribute('id','cardCompletionTime');
+        cardForm.appendChild(cardCompletionTime)
+
+        let saveButton = document.createElement('button');
+        saveButton.textContent = "Save";      
+        saveButton.boardObject = $theBoard;         
+
+        saveButton.addEventListener('click',Task.saveTask,false);        
+        cardForm.appendChild(saveButton);
+
+
+
+        $theBoard.boardLane.appendChild(cardDiv);
+
     }
 }

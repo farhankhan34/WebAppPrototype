@@ -137,7 +137,7 @@ var Task = /*#__PURE__*/function () {
   /************************************************************************
    *      specific to the object instances                                *
    *                                                                      */
-  function Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container) {
+  function Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
     _classCallCheck(this, Task);
 
     this.taskName = $taskName;
@@ -145,7 +145,7 @@ var Task = /*#__PURE__*/function () {
     this.completionTime = $completionTime;
     this.priority = $priority;
     this.completionStatus = $completionStatus;
-    this.container = $container; // Give a unique id for each task
+    this.board = $board; // Give a unique id for each task
 
     this.taskID = Task.allTasks.length + 1;
   }
@@ -170,12 +170,11 @@ var Task = /*#__PURE__*/function () {
       deleteButton.taskObject = this;
       deleteButton.addEventListener('click', Task.removeTask, false);
       taskDiv.appendChild(deleteButton);
-      this.container.appendChild(taskDiv);
+      this.board.boardLane.appendChild(taskDiv); // alert('Rendered!');
     }
   }, {
     key: "unRender",
-    value: function unRender() {
-      this.container.innerHTML = '';
+    value: function unRender() {//this.container.innerHTML = '';
     }
   }], [{
     key: "add",
@@ -183,14 +182,18 @@ var Task = /*#__PURE__*/function () {
     /************************************************************************
      *      static is common to all instances since they're called          *
      *      on the class itself.                                            */
-    function add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container) {
+    function add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
       /* create a new task using the supplied info */
-      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $container); //newTask.unRender();
+      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board); //newTask.unRender();
+      // newTask.render();
 
-      newTask.render();
       /* add the newly created task into the task list */
 
       Task.allTasks.push(newTask);
+      alert(Task.allTasks.length);
+      if (Task.allTasks.length < 5) newTask.render();
+      return true; //Task.unrenderAll();
+      //Task.renderAll();
     }
   }, {
     key: "renderAll",
@@ -211,19 +214,61 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "removeTask",
     value: function removeTask($event) {
-      console.log($event);
-      console.log($event.currentTarget);
-      console.log($event.currentTarget.taskObject); //alert("Delete Task '" + $event.currentTarget.taskID + "' ?");
-      //Task.allTasks.pop();
+      // console.log($event);
+      // console.log($event.currentTarget);
+      // console.log($event.currentTarget.taskObject);
+      alert("Delete Task '" + $event.currentTarget.taskID + "' ?"); //Task.allTasks.pop();
 
-      /*
-              const result = Task.allTasks.filter(task => task.taskID != $event.currentTarget.taskObject.taskID);
-      
-              Task.allTasks = result;
-      
-              Task.unrenderAll();
-              Task.renderAll();
-        */
+      var result = Task.allTasks.filter(function (task) {
+        return task.taskID != $event.currentTarget.taskObject.taskID;
+      });
+      Task.allTasks = result;
+      Task.unrenderAll();
+      Task.renderAll();
+    }
+  }, {
+    key: "saveTask",
+    value: function saveTask($event) {
+      var $taskName = "TEST1"; // document.getElementById("taskName").value; 
+
+      var $dueDate = "12/02/2022"; //document.getElementById("dueDate").value;
+
+      var $eta = "3days";
+      var $completionTime = "";
+      var $priority = "3";
+      var $completionStatus = "new";
+      Task.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $event.currentTarget.boardObject);
+    }
+  }, {
+    key: "taskAddForm",
+    value: function taskAddForm($theBoard) {
+      alert('Created by ' + $theBoard.name);
+      var cardDiv = document.createElement('div');
+      cardDiv.setAttribute('class', 'card card-form-div');
+      var cardForm = document.createElement('form');
+      cardForm.setAttribute('id', 'cardForm');
+      cardDiv.appendChild(cardForm);
+      var cardName = document.createElement('input');
+      cardName.setAttribute('id', 'cardName');
+      cardName.setAttribute('type', 'text');
+      cardForm.appendChild(cardName);
+      var cardDueDate = document.createElement('input');
+      cardDueDate.setAttribute('id', 'CardDueDate');
+      cardDueDate.setAttribute('type', 'date');
+      cardForm.appendChild(cardDueDate);
+      var cardETA = document.createElement('input');
+      cardETA.setAttribute('id', 'cardETA');
+      cardETA.setAttribute('type', 'date');
+      cardForm.appendChild(cardETA);
+      var cardCompletionTime = document.createElement('input');
+      cardCompletionTime.setAttribute('id', 'cardCompletionTime');
+      cardForm.appendChild(cardCompletionTime);
+      var saveButton = document.createElement('button');
+      saveButton.textContent = "Save";
+      saveButton.boardObject = $theBoard;
+      saveButton.addEventListener('click', Task.saveTask, false);
+      cardForm.appendChild(saveButton);
+      $theBoard.boardLane.appendChild(cardDiv);
     }
   }]);
 
@@ -260,25 +305,39 @@ var Board = /*#__PURE__*/function () {
   function Board(name) {
     _classCallCheck(this, Board);
 
-    /* add a swimline (column) as a board */
-    this.boardLane = document.createElement('div');
-    this.boardLane.setAttribute('class', 'board');
     this.name = name;
+
+    if (_task.default.allBoards) {
+      this.boardID = _task.default.allBoards.length + 1;
+    }
   }
 
   _createClass(Board, [{
     key: "addTask",
     value: function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
-      _task.default.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, this.boardLane);
+      _task.default.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, this);
     }
   }, {
     key: "render",
     value: function render(container) {
+      /* add a swimline (column) as a board */
+      this.boardLane = document.createElement('div');
+      this.boardLane.setAttribute('class', 'board');
       /* add a label for the board */
+
       var boardLabel = document.createElement('div');
       boardLabel.setAttribute('class', 'label');
       boardLabel.innerHTML = this.name;
       this.boardLane.appendChild(boardLabel);
+      /* add a Task Add button for the borard */
+
+      /* <input type="button" name="addTask" id="addTask" value="Add"> */
+
+      var addTaskButton = document.createElement('button');
+      addTaskButton.textContent = "+";
+      addTaskButton.boardObject = this;
+      addTaskButton.addEventListener('click', Board.taskAddUI, false);
+      this.boardLane.appendChild(addTaskButton);
       container.appendChild(this.boardLane);
     }
   }], [{
@@ -299,6 +358,12 @@ var Board = /*#__PURE__*/function () {
       Board.allBoards.forEach(function (board) {
         board.render(container);
       });
+    }
+  }, {
+    key: "taskAddUI",
+    value: function taskAddUI($event) {
+      //alert($event.currentTarget.boardObject.name);
+      _task.default.taskAddForm($event.currentTarget.boardObject);
     }
   }]);
 
@@ -336,7 +401,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62618" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

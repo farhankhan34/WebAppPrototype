@@ -58,16 +58,16 @@ let $completionStatus = "new";
   
 let addTaskButton = document.getElementById("addTask");
 addTaskButton.addEventListener("click", function(){
-
-let $taskName = document.getElementById("taskName").value; 
-let $dueDate = document.getElementById("dueDate").value;
-let $eta = "3days";
-let $completionTime = ""; 
-let $priority = "3";
-let $completionStatus = "new";
-toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );                     
-//Task.renderAll();
-});
+        let $taskName = document.getElementById("taskName").value; 
+        let $dueDate = document.getElementById("dueDate").value;
+        let $eta = "3days";
+        let $completionTime = ""; 
+        let $priority = "3";
+        let $completionStatus = "new";
+        toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );                     
+        //Task.renderAll();
+        }
+      );
 
  
   
