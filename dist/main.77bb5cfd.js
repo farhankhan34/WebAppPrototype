@@ -217,7 +217,11 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56497" + '/');
+>>>>>>> 0382419... added primary drag and drop
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -329,7 +329,7 @@ var Board = /*#__PURE__*/function () {
       boardLabel.setAttribute('class', 'label');
       boardLabel.innerHTML = this.name;
       this.boardLane.appendChild(boardLabel);
-      /* add a Task Add button for the borard */
+      /* add a Task Add button for the board */
 
       /* <input type="button" name="addTask" id="addTask" value="Add"> */
 
@@ -401,7 +401,11 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56187" + '/');
+>>>>>>> 0382419... added primary drag and drop
 
   ws.onmessage = function (event) {
     checkedAssets = {};

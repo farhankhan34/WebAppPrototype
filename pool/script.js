@@ -2,7 +2,7 @@ import Board from './scripts/board';
 import Task from './scripts/task';
  
 //console.log('Blah!');
-
+/*
 let button = document.getElementById("show-hide-task-form");
 button.addEventListener("click", function(){
   
@@ -13,31 +13,30 @@ button.addEventListener("click", function(){
     document.getElementById("taskEntryForm").style.visibility  = 'hidden';
   }
 });
-
+*/
 
 
 
 /* test data */
-
+/*
 let $taskName = "TEST Task"; 
 let $dueDate = "17/05/20201";
 let $eta = "3days";
 let $completionTime = ""; 
 let $priority = "3";
 let $completionStatus = "new";
-                         
+ */                        
 
 
- let toDo = Board.add('Todo');
- 
- //console.log("object name " + toDo.name);
- //console.log("object id " + toDo.name);
-
+ let toDo = Board.add('Todo'); 
  let doing =  Board.add('Doing');
- let done = Board.add('Done'); 
-  
-  Board.renderAll('container');
+ let done = Board.add('Done');
+ 
+ let $id_to_pass = 'app' ;
+ Board.renderAll($id_to_pass);
 
+
+/*
   $taskName = "I will to next"; 
   toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );
 
@@ -50,13 +49,14 @@ let $completionStatus = "new";
 
   $taskName = "Already Done"; 
   done.addTask( $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus  );
+*/
 
  // Task.renderAll();
 
 
 
   
-let addTaskButton = document.getElementById("addTask");
+/*let addTaskButton = document.getElementById("addTask");
 addTaskButton.addEventListener("click", function(){
         let $taskName = document.getElementById("taskName").value; 
         let $dueDate = document.getElementById("dueDate").value;
@@ -69,6 +69,16 @@ addTaskButton.addEventListener("click", function(){
         }
       );
 
+<<<<<<< HEAD:public/script.js
+=======
+
+let renderAllHandler = document.getElementById("renderAll");
+renderAllHandler.addEventListener("click", function(){
+        Task.unrenderAll();
+        Task.renderAll();
+    }
+);*/
+>>>>>>> 0382419... added primary drag and drop:pool/script.js
  
   
   

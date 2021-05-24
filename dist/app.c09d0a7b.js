@@ -147,7 +147,7 @@ var Task = /*#__PURE__*/function () {
     this.completionStatus = $completionStatus;
     this.board = $board; // Give a unique id for each task
 
-    this.taskID = Task.allTasks.length + 1;
+    this.taskID = 'T:' + Number(Task.allTasks.length + 1);
   }
 
   _createClass(Task, [{
@@ -155,6 +155,19 @@ var Task = /*#__PURE__*/function () {
     value: function render() {
       var taskDiv = document.createElement('div');
       taskDiv.setAttribute('class', 'card');
+      taskDiv.setAttribute('id', this.taskID);
+      taskDiv.setAttribute('draggable', 'true');
+
+      taskDiv.ondragstart = function ($event) {
+        $event.dataTransfer.setData("Text", $event.target.id);
+        $event.target.style.opacity = "0.4"; //Show the board name on console
+
+        var result = Task.allTasks.filter(function (task) {
+          return task.taskID == $event.target.id;
+        });
+        console.log(JSON.stringify(result));
+      };
+
       var taskText = document.createElement('h3');
       taskText.textContent = this.taskName;
       taskDiv.appendChild(taskText);
@@ -170,11 +183,12 @@ var Task = /*#__PURE__*/function () {
       deleteButton.taskObject = this;
       deleteButton.addEventListener('click', Task.removeTask, false);
       taskDiv.appendChild(deleteButton);
-      this.board.boardLane.appendChild(taskDiv); // alert('Rendered!');
+      this.board.tasks.appendChild(taskDiv); // alert('Rendered!');
     }
   }, {
     key: "unRender",
-    value: function unRender() {//this.container.innerHTML = '';
+    value: function unRender() {
+      this.board.tasks.innerHTML = '';
     }
   }], [{
     key: "add",
@@ -190,9 +204,10 @@ var Task = /*#__PURE__*/function () {
       /* add the newly created task into the task list */
 
       Task.allTasks.push(newTask);
-      alert(Task.allTasks.length);
-      if (Task.allTasks.length < 5) newTask.render();
-      return true; //Task.unrenderAll();
+      newTask.render();
+      console.log(Task.allTasks.length); //if(Task.allTasks.length <5)
+      //return true;
+      //Task.unrenderAll();
       //Task.renderAll();
     }
   }, {
@@ -229,31 +244,38 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "saveTask",
     value: function saveTask($event) {
-      var $taskName = "TEST1"; // document.getElementById("taskName").value; 
-
-      var $dueDate = "12/02/2022"; //document.getElementById("dueDate").value;
-
+      var $taskName = document.getElementById("cardName").value;
+      var $dueDate = document.getElementById("cardDueDate").value;
       var $eta = "3days";
       var $completionTime = "";
       var $priority = "3";
       var $completionStatus = "new";
-      Task.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $event.currentTarget.boardObject);
+      Task.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $event.currentTarget.boardObject); // getElementById('taskEntryForm').parentNode.removeChild(getElementById('taskEntryForm'));
+
+      var element = document.getElementById("taskEntryForm");
+      element.parentNode.removeChild(element);
+    }
+  }, {
+    key: "onDragStart",
+    value: function onDragStart($event) {
+      console.log('Drag started : ' + JSON.stringify($event)); // $event.taskOnMove.setData("taskId", $event.target.id);
     }
   }, {
     key: "taskAddForm",
     value: function taskAddForm($theBoard) {
-      alert('Created by ' + $theBoard.name);
-      var cardDiv = document.createElement('div');
-      cardDiv.setAttribute('class', 'card card-form-div');
-      var cardForm = document.createElement('form');
+      //    alert('Created by ' + $theBoard.name) ;
+      var taskEntryForm = document.createElement('div');
+      taskEntryForm.setAttribute('class', 'card card-form-div');
+      taskEntryForm.setAttribute('id', 'taskEntryForm');
+      var cardForm = document.createElement('div');
       cardForm.setAttribute('id', 'cardForm');
-      cardDiv.appendChild(cardForm);
+      taskEntryForm.appendChild(cardForm);
       var cardName = document.createElement('input');
       cardName.setAttribute('id', 'cardName');
       cardName.setAttribute('type', 'text');
       cardForm.appendChild(cardName);
       var cardDueDate = document.createElement('input');
-      cardDueDate.setAttribute('id', 'CardDueDate');
+      cardDueDate.setAttribute('id', 'cardDueDate');
       cardDueDate.setAttribute('type', 'date');
       cardForm.appendChild(cardDueDate);
       var cardETA = document.createElement('input');
@@ -268,7 +290,7 @@ var Task = /*#__PURE__*/function () {
       saveButton.boardObject = $theBoard;
       saveButton.addEventListener('click', Task.saveTask, false);
       cardForm.appendChild(saveButton);
-      $theBoard.boardLane.appendChild(cardDiv);
+      $theBoard.boardLane.appendChild(taskEntryForm);
     }
   }]);
 
@@ -306,10 +328,7 @@ var Board = /*#__PURE__*/function () {
     _classCallCheck(this, Board);
 
     this.name = name;
-
-    if (_task.default.allBoards) {
-      this.boardID = _task.default.allBoards.length + 1;
-    }
+    this.boardID = 'B:' + Number(Board.allBoards.length + 1);
   }
 
   _createClass(Board, [{
@@ -322,7 +341,34 @@ var Board = /*#__PURE__*/function () {
     value: function render(container) {
       /* add a swimline (column) as a board */
       this.boardLane = document.createElement('div');
+      this.boardLane.setAttribute('id', this.boardID);
       this.boardLane.setAttribute('class', 'board');
+      this.boardLane.setAttribute('class', 'droptarget'); //this.boardLane.addEventListener('ondrop',Board.onTaskDropped);
+      //this.boardLane.addEventListener('ondragover',Board.onTaskDragOver);
+
+      this.boardLane.addEventListener("drop", function ($event) {
+        $event.preventDefault();
+
+        if ($event.target.className == "droptarget") {
+          var $taskID = $event.dataTransfer.getData("Text");
+          var $taskElement = document.getElementById($taskID);
+          $event.target.appendChild($taskElement);
+          $taskElement.style.opacity = "1"; //finally attache the new board object with the task
+
+          var $taskOnMove = _task.default.allTasks.filter(function (task) {
+            return task.taskID == $taskID;
+          }); //console.log("old board id " +  JSON.stringify($taskOnMove[0].board.boardID));
+          //console.log("New board id " + $event.target.id);
+
+
+          $taskOnMove[0].board = $event.target;
+        }
+      });
+      this.boardLane.addEventListener("dragover", function (event) {
+        //var data = event.dataTransfer.getData("Text");
+        //console.log("ID" + data);
+        event.preventDefault();
+      });
       /* add a label for the board */
 
       var boardLabel = document.createElement('div');
@@ -338,6 +384,12 @@ var Board = /*#__PURE__*/function () {
       addTaskButton.boardObject = this;
       addTaskButton.addEventListener('click', Board.taskAddUI, false);
       this.boardLane.appendChild(addTaskButton);
+      /* add a label for the board */
+
+      this.tasks = document.createElement('div');
+      this.tasks.setAttribute('class', 'all-tasks');
+      this.tasks.innerHTML = "Put all tasks in here!";
+      this.boardLane.appendChild(this.tasks);
       container.appendChild(this.boardLane);
     }
   }], [{
@@ -365,6 +417,20 @@ var Board = /*#__PURE__*/function () {
       //alert($event.currentTarget.boardObject.name);
       _task.default.taskAddForm($event.currentTarget.boardObject);
     }
+  }, {
+    key: "onTaskDragOver",
+    value: function onTaskDragOver($event) {
+      $event.preventDefault();
+      console.log('It on over...');
+    }
+  }, {
+    key: "onTaskDropped",
+    value: function onTaskDropped($event) {
+      $event.preventDefault();
+      var taskId = $event.taskOnMove.getData("taskId");
+      $event.target.appendChild(document.getElementById(taskId));
+      console.log('Dropped!');
+    }
   }]);
 
   return Board;
@@ -373,49 +439,33 @@ var Board = /*#__PURE__*/function () {
 exports.default = Board;
 
 _defineProperty(Board, "allBoards", []);
-},{"./task":"scripts/task.js"}],"script.js":[function(require,module,exports) {
+},{"./task":"scripts/task.js"}],"scripts/app.js":[function(require,module,exports) {
 "use strict";
 
-var _board = _interopRequireDefault(require("./scripts/board"));
-
-var _task = _interopRequireDefault(require("./scripts/task"));
+var _board = _interopRequireDefault(require("./board"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//console.log('Blah!');
-
-/*
-let button = document.getElementById("show-hide-task-form");
-button.addEventListener("click", function(){
-  
-  if(document.getElementById("taskEntryForm").style.visibility == 'hidden'){
-    document.getElementById("taskEntryForm").style.visibility  = 'visible';
-    }
-  else {
-    document.getElementById("taskEntryForm").style.visibility  = 'hidden';
-  }
-});
-*/
-
-/* test data */
-
-/*
-let $taskName = "TEST Task"; 
-let $dueDate = "17/05/20201";
-let $eta = "3days";
-let $completionTime = ""; 
-let $priority = "3";
-let $completionStatus = "new";
- */
 var toDo = _board.default.add('Todo');
 
 var doing = _board.default.add('Doing');
 
 var done = _board.default.add('Done');
 
-<<<<<<< HEAD
-_board.default.renderAll('container');
+var $id_to_pass = 'app';
 
+_board.default.renderAll($id_to_pass);
+/* test data */
+
+/* for development */
+
+
+var $taskName = "TEST Task";
+var $dueDate = "17/05/20201";
+var $eta = "3days";
+var $completionTime = "";
+var $priority = "3";
+var $completionStatus = "new";
 $taskName = "I will to next";
 toDo.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus);
 $taskName = "Working on";
@@ -423,60 +473,8 @@ doing.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completion
 $taskName = "Working on Another Task";
 doing.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus);
 $taskName = "Already Done";
-done.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus); // Task.renderAll();
-
-var addTaskButton = document.getElementById("addTask");
-addTaskButton.addEventListener("click", function () {
-  var $taskName = document.getElementById("taskName").value;
-  var $dueDate = document.getElementById("dueDate").value;
-  var $eta = "3days";
-  var $completionTime = "";
-  var $priority = "3";
-  var $completionStatus = "new";
-  toDo.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus); //Task.renderAll();
-});
-=======
-var $id_to_pass = 'app';
-
-_board.default.renderAll($id_to_pass);
-/*
-  $taskName = "I will to next"; 
-  toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );
-
-  $taskName = "Working on"; 
-  doing.addTask( $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus  );
-
-  $taskName = "Working on Another Task"; 
-  doing.addTask( $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus  );
-
-
-  $taskName = "Already Done"; 
-  done.addTask( $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus  );
-*/
-// Task.renderAll();
-
-/*let addTaskButton = document.getElementById("addTask");
-addTaskButton.addEventListener("click", function(){
-        let $taskName = document.getElementById("taskName").value; 
-        let $dueDate = document.getElementById("dueDate").value;
-        let $eta = "3days";
-        let $completionTime = ""; 
-        let $priority = "3";
-        let $completionStatus = "new";
-        toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );                     
-        //Task.renderAll();
-        }
-      );
-
-
-let renderAllHandler = document.getElementById("renderAll");
-renderAllHandler.addEventListener("click", function(){
-        Task.unrenderAll();
-        Task.renderAll();
-    }
-);*/
->>>>>>> 0382419... added primary drag and drop
-},{"./scripts/board":"scripts/board.js","./scripts/task":"scripts/task.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+done.addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus);
+},{"./board":"scripts/board.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -504,11 +502,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-<<<<<<< HEAD
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
-=======
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56187" + '/');
->>>>>>> 0382419... added primary drag and drop
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56497" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -684,5 +678,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","script.js"], null)
-//# sourceMappingURL=/script.75da7f30.js.map
+},{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","scripts/app.js"], null)
+//# sourceMappingURL=/app.c09d0a7b.js.map

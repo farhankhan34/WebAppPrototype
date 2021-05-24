@@ -91,9 +91,18 @@ export default class Task {
             $completionStatus,
             $event.currentTarget.boardObject);
             
+           // getElementById('taskEntryForm').parentNode.removeChild(getElementById('taskEntryForm'));
 
+            var element = document.getElementById("taskEntryForm");
+            element.parentNode.removeChild(element);
             
         
+     }
+
+     static onDragStart($event){
+         console.log('Drag started : ' + JSON.stringify($event));
+
+       // $event.taskOnMove.setData("taskId", $event.target.id);
      }
 
     /************************************************************************
@@ -116,7 +125,7 @@ export default class Task {
         this.completionStatus = $completionStatus;
         this.board = $board;
         // Give a unique id for each task
-        this.taskID = Task.allTasks.length + 1;
+        this.taskID = 'T:' + Number(Task.allTasks.length + 1 ) ;
 
         }
 
@@ -128,6 +137,21 @@ export default class Task {
 
         let taskDiv =  document.createElement('div');
         taskDiv.setAttribute('class','card');
+        taskDiv.setAttribute('id',this.taskID);
+
+        taskDiv.setAttribute('draggable','true');
+        
+
+        taskDiv.ondragstart = function($event){
+            $event.dataTransfer.setData("Text", $event.target.id);                    
+            $event.target.style.opacity = "0.4";
+
+            //Show the board name on console
+            const result = Task.allTasks.filter(task => task.taskID == $event.target.id);
+            console.log(JSON.stringify(result));
+            
+        };
+        
 
         let taskText = document.createElement('h3');
         taskText.textContent = this.taskName;
@@ -161,14 +185,15 @@ export default class Task {
 
   static taskAddForm($theBoard){
       
-    alert('Created by ' + $theBoard.name) ;
+//    alert('Created by ' + $theBoard.name) ;
 
-        let cardDiv =  document.createElement('div');
-        cardDiv.setAttribute('class','card card-form-div');
+        let taskEntryForm =  document.createElement('div');
+        taskEntryForm.setAttribute('class','card card-form-div');
+        taskEntryForm.setAttribute('id','taskEntryForm');
 
         let cardForm = document.createElement('form');
         cardForm.setAttribute ('id', 'cardForm');
-        cardDiv.appendChild(cardForm);
+        taskEntryForm.appendChild(cardForm);
 
         let cardName = document.createElement('input');
         cardName.setAttribute ('id', 'cardName');
@@ -198,7 +223,9 @@ export default class Task {
 
 
 
-        $theBoard.boardLane.appendChild(cardDiv);
+
+
+        $theBoard.boardLane.appendChild(taskEntryForm);
 
     }
 }

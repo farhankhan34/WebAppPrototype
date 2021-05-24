@@ -13,9 +13,11 @@ export default class Board {
     }
     static renderAll($containerId){
         let container = document.getElementById($containerId);
-        Board.allBoards.forEach(function(board){
-            board.render(container);
-          });
+        Board.allBoards.forEach(
+            function(board){
+                     board.render(container);
+                    }
+          );
     }  
 
     static taskAddUI($event){
@@ -23,18 +25,25 @@ export default class Board {
         Task.taskAddForm($event.currentTarget.boardObject);
         
     }
+
+    static onTaskDragOver($event){
+        $event.preventDefault();
+        console.log('It on over...');
+    }
     
+   static onTaskDropped($event) {
+    $event.preventDefault();
+    var taskId = $event.taskOnMove.getData("taskId");
+    $event.target.appendChild(document.getElementById(taskId));
+    console.log('Dropped!');
+   }
+
     /************************************************************************
      *      specific to the object instances                                *
      *                                                                      */
-    constructor(name) {
-          
-
-        this.name = name;
-        if(Task.allBoards){
-        this.boardID = Task.allBoards.length + 1;
-        }
-                  
+    constructor(name) {         
+        this.name = name;        
+        this.boardID = 'B:' + Number( Board.allBoards.length + 1 );
     }
 
     addTask(
@@ -61,7 +70,39 @@ export default class Board {
      
  /* add a swimline (column) as a board */
         this.boardLane =  document.createElement('div');
+        this.boardLane.setAttribute('id',this.boardID);
         this.boardLane.setAttribute('class','board');
+        this.boardLane.setAttribute('class','droptarget');
+
+        //this.boardLane.addEventListener('ondrop',Board.onTaskDropped);
+        //this.boardLane.addEventListener('ondragover',Board.onTaskDragOver);
+
+        this.boardLane.addEventListener("drop", function($event) {
+            $event.preventDefault();
+            if ( $event.target.className == "droptarget" ) {
+              
+              let $taskID = $event.dataTransfer.getData("Text");
+              let $taskElement = document.getElementById($taskID);
+              $event.target.appendChild($taskElement);
+              $taskElement.style.opacity = "1";
+               
+              //finally attache the new board object with the task
+              const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
+
+              //console.log("old board id " +  JSON.stringify($taskOnMove[0].board.boardID));
+              //console.log("New board id " + $event.target.id);
+
+              $taskOnMove[0].board = $event.target;
+            }
+          });
+
+
+          this.boardLane.addEventListener("dragover", function(event) {
+            //var data = event.dataTransfer.getData("Text");
+            //console.log("ID" + data);
+            event.preventDefault();
+          });
+
 
         /* add a label for the board */ 
         let boardLabel =  document.createElement('div');
@@ -71,7 +112,7 @@ export default class Board {
         this.boardLane.appendChild(boardLabel);
         
 
-        /* add a Task Add button for the borard */
+        /* add a Task Add button for the board */
         /* <input type="button" name="addTask" id="addTask" value="Add"> */
 
         let addTaskButton = document.createElement('button');

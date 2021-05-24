@@ -84,6 +84,7 @@
 
 .board {
   border: 5px solid blueviolet;
+  background-color: rgba(138, 43, 226, 0.5);
 }
 .board .label {
   text-align: center;
