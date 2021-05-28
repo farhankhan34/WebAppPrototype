@@ -18,6 +18,7 @@ let $completionTime = "";
 let $priority = "3";
 let $completionStatus = "new";
  
+  doing.addMusicPlayer();
 
   $taskName = "I will to next"; 
   toDo.addTask(  $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus   );
@@ -27,6 +28,7 @@ let $completionStatus = "new";
 
   $taskName = "Working on Another Task"; 
   doing.addTask( $taskName, $dueDate, $eta,  $completionTime,   $priority,  $completionStatus  );
+  
 
 
   $taskName = "Already Done"; 

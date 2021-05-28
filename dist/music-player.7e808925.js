@@ -184,7 +184,7 @@ function reloadCSS() {
 }
 
 module.exports = reloadCSS;
-},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"scss/main.scss":[function(require,module,exports) {
+},{"./bundle-url":"../node_modules/parcel-bundler/src/builtins/bundle-url.js"}],"scss/music-player.scss":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
 
 module.hot.dispose(reloadCSS);
@@ -217,15 +217,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-<<<<<<< HEAD
-<<<<<<< HEAD
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
-=======
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56497" + '/');
->>>>>>> 0382419... added primary drag and drop
-=======
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "53749" + '/');
->>>>>>> aa58519... Music Player Sub Project Started
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -402,4 +394,4 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 },{}]},{},["../node_modules/parcel-bundler/src/builtins/hmr-runtime.js"], null)
-//# sourceMappingURL=/main.77bb5cfd.js.map
+//# sourceMappingURL=/music-player.7e808925.js.map

@@ -1,4 +1,6 @@
 import Task from './task';
+import MusicPlayer from './music-player';
+
 export default class Board {
     
     /************************************************************************
@@ -64,6 +66,11 @@ export default class Board {
             $completionStatus,
             this);
             
+    }
+
+    addMusicPlayer(){
+        this.musicPlayer = new MusicPlayer(this);
+        this.musicPlayer.render();
     }
 
     render(container)  {
