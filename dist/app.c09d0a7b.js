@@ -314,10 +314,17 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/*
+Code reference : https://www.geeksforgeeks.org/create-a-music-player-using-javascript/
+The code is recycled from the above source
+*/
 var MusicPlayer = /*#__PURE__*/function () {
   function MusicPlayer($board) {
     _classCallCheck(this, MusicPlayer);
 
+    var $theMusicPlayer = this;
     this.board = $board; // Select all the elements in the HTML page
     // and assign them to a variable
 
@@ -335,50 +342,53 @@ var MusicPlayer = /*#__PURE__*/function () {
 
     this.track_index = 0;
     this.isPlaying = false;
-    this.updateTimer; // Create the audio element for the player
+    this.updateTimer = 0; // Create the audio element for the player
 
     this.curr_track = document.createElement('audio'); // Define the list of tracks that have to be played
 
-    var track_list = [{
+    this.track_list = [{
       name: "Night Owl",
       artist: "Broke For Free",
-      image: "Image URL",
-      path: "Night_Owl.mp3"
+      image: "https://images.pexels.com/photos/2264753/pexels-photo-2264753.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
+      path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Broke_For_Free/Directionless_EP/Broke_For_Free_-_01_-_Night_Owl.mp3"
     }, {
       name: "Enthusiast",
       artist: "Tours",
-      image: "Image URL",
-      path: "Enthusiast.mp3"
+      image: "https://images.pexels.com/photos/3100835/pexels-photo-3100835.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
+      path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
     }, {
       name: "Shipping Lanes",
       artist: "Chad Crouch",
-      image: "Image URL",
-      path: "Shipping_Lanes.mp3"
+      image: "https://images.pexels.com/photos/1717969/pexels-photo-1717969.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
+      path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3"
     }];
+    this.loadTrack(this.track_index);
   }
 
   _createClass(MusicPlayer, [{
     key: "loadTrack",
     value: function loadTrack(track_index) {
       // Clear the previous seek timer
-      clearInterval(updateTimer);
-      resetValues(); // Load a new track
+      clearInterval(this.updateTimer);
+      this.resetValues(); // Load a new track
 
-      curr_track.src = track_list[track_index].path;
-      curr_track.load(); // Update details of the track
+      this.curr_track.src = this.track_list[track_index].path;
+      this.curr_track.load(); // Update details of the track
 
-      track_art.style.backgroundImage = "url(" + track_list[track_index].image + ")";
-      track_name.textContent = track_list[track_index].name;
-      track_artist.textContent = track_list[track_index].artist;
-      now_playing.textContent = "PLAYING " + (track_index + 1) + " OF " + track_list.length; // Set an interval of 1000 milliseconds
+      this.track_art.style.backgroundImage = "url(" + this.track_list[track_index].image + ")";
+      this.track_name.textContent = this.track_list[track_index].name;
+      this.track_artist.textContent = this.track_list[track_index].artist;
+      this.now_playing.textContent = "PLAYING " + (this.track_index + 1) + " OF " + this.track_list.length; // Set an interval of 1000 milliseconds
       // for updating the seek slider
 
-      updateTimer = setInterval(seekUpdate, 1000); // Move to the next track if the current finishes playing
+      this.updateTimer = setInterval(this.seekUpdate, 1000); // Move to the next track if the current finishes playing
       // using the 'ended' event
 
-      curr_track.addEventListener("ended", nextTrack); // Apply a random background color
+      this.curr_track.addEventListener("ended", function () {
+        MusicPlayer.thePlayer.nextTrack;
+      }); // Apply a random background color
 
-      random_bg_color();
+      this.random_bg_color();
     }
   }, {
     key: "random_bg_color",
@@ -389,9 +399,10 @@ var MusicPlayer = /*#__PURE__*/function () {
       var green = Math.floor(Math.random() * 256) + 64;
       var blue = Math.floor(Math.random() * 256) + 64; // Construct a color withe the given values
 
-      var bgColor = "rgb(" + red + ", " + green + ", " + blue + ")"; // Set the background to the new color
+      var bgColor = "rgb(" + red + ", " + green + ", " + blue + ")"; // Set the background to the new color            
 
-      document.body.style.background = bgColor;
+      var $thePlayer = document.getElementById('deco-player');
+      $thePlayer.style.background = bgColor;
     } // Function to reset all values to their default
 
   }, {
@@ -455,7 +466,7 @@ var MusicPlayer = /*#__PURE__*/function () {
       // and get the relative duration to the track
       this.seekto = this.curr_track.duration * (this.seek_slider.value / 100); // Set the current track position to the calculated seek position
 
-      this.curr_track.currentTime = seekto;
+      this.curr_track.currentTime = this.seekto;
     }
   }, {
     key: "setVolume",
@@ -467,16 +478,16 @@ var MusicPlayer = /*#__PURE__*/function () {
   }, {
     key: "seekUpdate",
     value: function seekUpdate() {
-      var seekPosition = 0; // Check if the current track duration is a legible number
+      var seekPosition = 0; // 
 
-      if (!isNaN(this.curr_track.duration)) {
-        seekPosition = this.curr_track.currentTime * (100 / this.curr_track.duration);
-        this.seek_slider.value = seekPosition; // Calculate the time left and the total duration
+      if (MusicPlayer.thePlayer && !isNaN(MusicPlayer.thePlayer.curr_track.duration)) {
+        seekPosition = MusicPlayer.thePlayer.curr_track.currentTime * (100 / MusicPlayer.thePlayer.curr_track.duration);
+        MusicPlayer.thePlayer.seek_slider.value = seekPosition; // Calculate the time left and the total duration
 
-        var currentMinutes = Math.floor(curr_track.currentTime / 60);
-        var currentSeconds = Math.floor(curr_track.currentTime - currentMinutes * 60);
-        var durationMinutes = Math.floor(curr_track.duration / 60);
-        var durationSeconds = Math.floor(curr_track.duration - durationMinutes * 60); // Add a zero to the single digit time values
+        var currentMinutes = Math.floor(MusicPlayer.thePlayer.curr_track.currentTime / 60);
+        var currentSeconds = Math.floor(MusicPlayer.thePlayer.curr_track.currentTime - currentMinutes * 60);
+        var durationMinutes = Math.floor(MusicPlayer.thePlayer.curr_track.duration / 60);
+        var durationSeconds = Math.floor(MusicPlayer.thePlayer.curr_track.duration - durationMinutes * 60); // Add a zero to the single digit time values
 
         if (currentSeconds < 10) {
           currentSeconds = "0" + currentSeconds;
@@ -495,8 +506,8 @@ var MusicPlayer = /*#__PURE__*/function () {
         } // Display the updated duration
 
 
-        this.curr_time.textContent = currentMinutes + ":" + currentSeconds;
-        this.total_duration.textContent = durationMinutes + ":" + durationSeconds;
+        MusicPlayer.thePlayer.curr_time.textContent = currentMinutes + ":" + currentSeconds;
+        MusicPlayer.thePlayer.total_duration.textContent = durationMinutes + ":" + durationSeconds;
       }
     }
   }, {
@@ -519,12 +530,20 @@ var MusicPlayer = /*#__PURE__*/function () {
 
       var $playpauseTrack = document.getElementById('playpauseTrack');
       playpauseTrack.addEventListener('click', MusicPlayer.PlayPauseTrack, false);
+      var $seek_slider = document.getElementById('seek_slider');
+
+      $seek_slider.onchange = function ($event) {
+        MusicPlayer.thePlayer.seekTo();
+      };
     }
   }], [{
     key: "PlayPauseTrack",
     value: function PlayPauseTrack() {
-      var $thePlayer = new MusicPlayer();
-      $thePlayer.playpauseTrack();
+      if (!MusicPlayer.thePlayer) {
+        MusicPlayer.thePlayer = new MusicPlayer();
+      }
+
+      MusicPlayer.thePlayer.playpauseTrack();
     }
   }]);
 
@@ -532,6 +551,8 @@ var MusicPlayer = /*#__PURE__*/function () {
 }();
 
 exports.default = MusicPlayer;
+
+_defineProperty(MusicPlayer, "thePlayer", void 0);
 },{}],"scripts/board.js":[function(require,module,exports) {
 "use strict";
 
@@ -743,7 +764,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53749" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56680" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

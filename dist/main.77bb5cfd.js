@@ -219,6 +219,7 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "55160" + '/');
 =======
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "56497" + '/');
@@ -226,6 +227,9 @@ if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
 =======
   var ws = new WebSocket(protocol + '://' + hostname + ':' + "53749" + '/');
 >>>>>>> aa58519... Music Player Sub Project Started
+=======
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56680" + '/');
+>>>>>>> 3ff7191... Music player scrolling through song functionality, general music player UI
 
   ws.onmessage = function (event) {
     checkedAssets = {};
