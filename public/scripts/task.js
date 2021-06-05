@@ -22,16 +22,19 @@ export default class Task {
                                         $priority, 
                                         $completionStatus,
                                         $board);
-                
-                //newTask.unRender();
-               // newTask.render();
+
+                //console.log(JSON.stringify($board));
+
+                newTask.storeTask();
+
+
                 /* add the newly created task into the task list */        
                 Task.allTasks.push(newTask);
+                newTask.render();
+               console.log(Task.allTasks.length);
 
-                alert(Task.allTasks.length);
-
-                if(Task.allTasks.length <5)    newTask.render();
-                return true;
+                //if(Task.allTasks.length <5)
+                //return true;
 
                 //Task.unrenderAll();
                 //Task.renderAll();
@@ -74,8 +77,8 @@ export default class Task {
         
         
 
-         let $taskName = "TEST1";// document.getElementById("taskName").value; 
-         let $dueDate = "12/02/2022";//document.getElementById("dueDate").value;
+         let $taskName =  document.getElementById("cardName").value;
+         let $dueDate = document.getElementById("cardDueDate").value;
          let $eta = "3days";
          let $completionTime = ""; 
          let $priority = "3";
@@ -117,7 +120,7 @@ export default class Task {
         $completionStatus,
         $board)
         {
-        this.taskName = $taskName;
+        this.taskName = $taskName,
         this.dueDate = $dueDate,
         this.eta = $eta;
         this.completionTime = $completionTime;
@@ -128,12 +131,30 @@ export default class Task {
         this.taskID = 'T:' + Number(Task.allTasks.length + 1 ) ;
 
         }
+    toJSON(){
+        return {
+            "taskID": this.taskID,
+            "boardID": this.board.boardID,
+            "taskName": this.taskName ,
+            "dueDate": this.dueDate,
+            "etc": this.eta ,
+            "completionTime": this.completionTime ,
+            "priority": this.priority ,
+            "completionStatus": this.completionStatus
+        }
+    }
 
- 
+    storeTask(){
+       // console.log(JSON.stringify(this));
+        window.localStorage.setItem(this.taskID, JSON.stringify(this));
 
-    render()  {      
+        let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
+        window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+    }
 
 
+
+    render()  {
 
         let taskDiv =  document.createElement('div');
         taskDiv.setAttribute('class','card');
@@ -171,7 +192,7 @@ export default class Task {
         deleteButton.addEventListener('click',Task.removeTask,false);        
         taskDiv.appendChild(deleteButton);
 
-        this.board.boardLane.appendChild(taskDiv);
+        this.board.tasks.appendChild(taskDiv);
 
        // alert('Rendered!');
         
@@ -179,8 +200,7 @@ export default class Task {
     }
 
     unRender() {
-
-        //this.container.innerHTML = '';
+        this.board.tasks.innerHTML = '';
     }
 
   static taskAddForm($theBoard){
@@ -191,7 +211,7 @@ export default class Task {
         taskEntryForm.setAttribute('class','card card-form-div');
         taskEntryForm.setAttribute('id','taskEntryForm');
 
-        let cardForm = document.createElement('form');
+        let cardForm = document.createElement('div');
         cardForm.setAttribute ('id', 'cardForm');
         taskEntryForm.appendChild(cardForm);
 
@@ -201,7 +221,7 @@ export default class Task {
         cardForm.appendChild(cardName);
 
         let cardDueDate = document.createElement('input');
-        cardDueDate.setAttribute('id','CardDueDate');
+        cardDueDate.setAttribute('id','cardDueDate');
         cardDueDate.setAttribute('type','date');
         cardForm.appendChild(cardDueDate);
 

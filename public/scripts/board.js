@@ -57,6 +57,8 @@ export default class Board {
         $completionStatus        
     )
     {
+        console.log("Board ID" + this.boardID);
+
         Task.add(
             $taskName, 
             $dueDate, 
@@ -74,7 +76,9 @@ export default class Board {
     }
 
     render(container)  {
-     
+
+
+
  /* add a swimline (column) as a board */
         this.boardLane =  document.createElement('div');
         this.boardLane.setAttribute('id',this.boardID);
@@ -121,12 +125,20 @@ export default class Board {
 
         /* add a Task Add button for the board */
         /* <input type="button" name="addTask" id="addTask" value="Add"> */
-
         let addTaskButton = document.createElement('button');
-        addTaskButton.textContent = "+";                
+        addTaskButton.textContent = "+";
         addTaskButton.boardObject = this;
-        addTaskButton.addEventListener('click',Board.taskAddUI,false);        
+        addTaskButton.addEventListener('click',Board.taskAddUI,false);
         this.boardLane.appendChild(addTaskButton);
+
+
+        /* add a label for the board */
+        this.tasks =  document.createElement('div');
+        this.tasks.setAttribute('class','all-tasks');
+        this.tasks.innerHTML =  "Put all tasks in here!";
+
+        this.boardLane.appendChild(this.tasks);
+
 
         container.appendChild(this.boardLane);
 

@@ -69,8 +69,6 @@ addTaskButton.addEventListener("click", function(){
         }
       );
 
-<<<<<<< HEAD:public/script.js
-=======
 
 let renderAllHandler = document.getElementById("renderAll");
 renderAllHandler.addEventListener("click", function(){
@@ -78,7 +76,6 @@ renderAllHandler.addEventListener("click", function(){
         Task.renderAll();
     }
 );*/
->>>>>>> 0382419... added primary drag and drop:pool/script.js
  
   
   
