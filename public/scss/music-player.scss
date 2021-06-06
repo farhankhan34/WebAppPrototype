@@ -4,7 +4,6 @@
 /* Using flex with the column direction to
     align items in a vertical direction */
 .player {
-  height: 95vh;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -16,13 +15,15 @@
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  margin-top: 25px;
 }
 
 .track-art {
+  /*
   margin: 25px;
   height: 250px;
   width: 250px;
+  */
+
   background-image: URL("https://source.unsplash.com/Qrspubmx6kE/640x360");
   background-size: cover;
   background-position: center;

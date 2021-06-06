@@ -1,11 +1,13 @@
 import Task from './task';
 import MusicPlayer from './music-player';
+import Dictionary from './dictionary';
 
 export default class Board {
     
     /************************************************************************
      *      static is common to all instances                               *
      *                                                                      */
+
     static allBoards = [];
    
     static add(name){
@@ -75,6 +77,11 @@ export default class Board {
         this.musicPlayer.render();
     }
 
+    addDictionary(){
+        this.dictionary = new Dictionary(this);
+        this.dictionary.render();
+    }
+
     render(container)  {
 
 
@@ -138,8 +145,6 @@ export default class Board {
         this.tasks.innerHTML =  "Put all tasks in here!";
 
         this.boardLane.appendChild(this.tasks);
-
-
         container.appendChild(this.boardLane);
 
     }
