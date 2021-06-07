@@ -1,0 +1,37 @@
+.dictionary-div {
+  position: relative;
+  margin: 1rem;
+  padding-bottom: calc(2em + 60px);
+  background: white;
+  box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s linear;
+  border: 3px solid blue;
+}
+
+.search-box {
+  position: relative;
+  margin: 1rem;
+  padding-bottom: calc(2em + 60px);
+  background: white;
+  box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s linear;
+  border: 3px solid black;
+}
+
+.search-results {
+  position: relative;
+  margin: 1rem;
+  padding-bottom: calc(2em + 60px);
+  background: white;
+  box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s linear;
+  border: 3px solid cyan;
+}
+
+/*# sourceMappingURL=/dictionary.1c0d58aa.css.map */

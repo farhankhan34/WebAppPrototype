@@ -3,6 +3,8 @@ export default class Task {
     /************************************************************************
      *      static is common to all instances since they're called          *
      *      on the class itself.                                            */
+    
+
     static allTasks = [];
    
     static add(
@@ -73,6 +75,10 @@ export default class Task {
        
     }
 
+    static getRunningTask(){
+        return Task.allTasks.filter(task => task.board.boardID == "B:2");
+    }
+
     static saveTask($event){        
         
         
@@ -129,6 +135,7 @@ export default class Task {
         this.board = $board;
         // Give a unique id for each task
         this.taskID = 'T:' + Number(Task.allTasks.length + 1 ) ;
+        this.startTime = 0;
 
         }
     toJSON(){
@@ -140,7 +147,8 @@ export default class Task {
             "etc": this.eta ,
             "completionTime": this.completionTime ,
             "priority": this.priority ,
-            "completionStatus": this.completionStatus
+            "completionStatus": this.completionStatus,
+            "lastStartTime": this.startTime,
         }
     }
 

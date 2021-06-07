@@ -19,8 +19,10 @@ let $completionTime = "";
 let $priority = "3";
 let $completionStatus = "new";
 
+  $doing.addFlowTimer();
   $doing.addDictionary();
   $doing.addMusicPlayer();
+  
 
 
 

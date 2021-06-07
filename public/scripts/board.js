@@ -1,6 +1,7 @@
 import Task from './task';
 import MusicPlayer from './music-player';
 import Dictionary from './dictionary';
+import FlowTimer from './flow-timer';
 
 export default class Board {
     
@@ -59,7 +60,7 @@ export default class Board {
         $completionStatus        
     )
     {
-        console.log("Board ID" + this.boardID);
+        console.log("Board ID : " + this.boardID);
 
         Task.add(
             $taskName, 
@@ -80,6 +81,11 @@ export default class Board {
     addDictionary(){
         this.dictionary = new Dictionary(this);
         this.dictionary.render();
+    }
+
+    addFlowTimer(){
+        this.flowTimer = new FlowTimer(this);
+        this.flowTimer.render();
     }
 
     render(container)  {
