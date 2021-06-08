@@ -30,7 +30,7 @@ export default class Board {
         Task.taskAddForm($event.currentTarget.boardObject);
         
     }
-
+/*
     static onTaskDragOver($event){
         $event.preventDefault();
         console.log('It on over...');
@@ -42,7 +42,7 @@ export default class Board {
     $event.target.appendChild(document.getElementById(taskId));
     console.log('Dropped!');
    }
-
+*/
     /************************************************************************
      *      specific to the object instances                                *
      *                                                                      */
@@ -98,9 +98,49 @@ export default class Board {
         this.boardLane.setAttribute('class','board');
         this.boardLane.setAttribute('class','droptarget');
 
-        //this.boardLane.addEventListener('ondrop',Board.onTaskDropped);
-        //this.boardLane.addEventListener('ondragover',Board.onTaskDragOver);
+       /********* add control section   **********/ 
+        let controlSection =  document.createElement('div');
+        controlSection.setAttribute('class','board-controls');
+        this.boardLane.appendChild(controlSection);
 
+
+        /* add a label for the board */ 
+        let boardLabel =  document.createElement('div');
+        boardLabel.setAttribute('class','label');
+        boardLabel.innerHTML =  this.name;
+        controlSection.appendChild(boardLabel);
+        
+
+        /* add a Task Add button for the board */
+        /* <input type="button" name="addTask" id="addTask" value="Add"> */
+
+        let addTaskButton = document.createElement('button');
+        addTaskButton.setAttribute('class','btn-add-task');
+        addTaskButton.textContent = "+";
+        addTaskButton.boardObject = this;
+        addTaskButton.addEventListener('click',Board.taskAddUI,false);
+        controlSection.appendChild(addTaskButton);
+
+       /******************* end of control section ****************/
+
+       /************ add a toolbox section ******************/
+       this.toolBoxSection =  document.createElement('div');
+       this.toolBoxSection.setAttribute('class','board-toolbox');
+       this.boardLane.appendChild(this.toolBoxSection);
+
+
+
+        /* add a placeholder for the all tasks */
+        this.tasks =  document.createElement('div');
+        this.tasks.setAttribute('class','all-tasks');
+        this.tasks.innerHTML =  "Put all tasks in here!";
+
+        this.boardLane.appendChild(this.tasks);
+        container.appendChild(this.boardLane);
+
+
+        /*************** add drag and Drop functions  ******************/
+        
         this.boardLane.addEventListener("drop", function($event) {
             $event.preventDefault();
             if ( $event.target.className == "droptarget" ) {
@@ -112,46 +152,15 @@ export default class Board {
                
               //finally attache the new board object with the task
               const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
-
-              //console.log("old board id " +  JSON.stringify($taskOnMove[0].board.boardID));
-              //console.log("New board id " + $event.target.id);
-
               $taskOnMove[0].board = $event.target;
             }
           });
 
 
-          this.boardLane.addEventListener("dragover", function(event) {
-            //var data = event.dataTransfer.getData("Text");
-            //console.log("ID" + data);
+          this.boardLane.addEventListener("dragover", function(event) {            
             event.preventDefault();
           });
-
-
-        /* add a label for the board */ 
-        let boardLabel =  document.createElement('div');
-        boardLabel.setAttribute('class','label');
-        boardLabel.innerHTML =  this.name;
-
-        this.boardLane.appendChild(boardLabel);
-        
-
-        /* add a Task Add button for the board */
-        /* <input type="button" name="addTask" id="addTask" value="Add"> */
-        let addTaskButton = document.createElement('button');
-        addTaskButton.textContent = "+";
-        addTaskButton.boardObject = this;
-        addTaskButton.addEventListener('click',Board.taskAddUI,false);
-        this.boardLane.appendChild(addTaskButton);
-
-
-        /* add a label for the board */
-        this.tasks =  document.createElement('div');
-        this.tasks.setAttribute('class','all-tasks');
-        this.tasks.innerHTML =  "Put all tasks in here!";
-
-        this.boardLane.appendChild(this.tasks);
-        container.appendChild(this.boardLane);
+          /******************** end of drag and drop functions ***************/
 
     }
 }

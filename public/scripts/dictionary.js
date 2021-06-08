@@ -129,7 +129,7 @@ export default class Dictionary {
         searchResults.setAttribute('class','search-results');
         dictionaryDiv.appendChild(searchResults);
 
-        this.board.boardLane.appendChild(dictionaryDiv);
+        this.board.toolBoxSection.appendChild(dictionaryDiv);
 
 
         

@@ -12,12 +12,14 @@ import 'regenerator-runtime/runtime';
 
  /* test data */
 /* for development */
+/*
 let $taskName = "TEST Task"; 
 let $dueDate = "17/05/20201";
 let $eta = "3days";
 let $completionTime = ""; 
 let $priority = "3";
 let $completionStatus = "new";
+*/
 
   $doing.addFlowTimer();
   $doing.addDictionary();

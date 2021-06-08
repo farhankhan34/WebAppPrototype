@@ -1,0 +1,15 @@
+.board-controls {
+  border: 3px solid gray;
+}
+.board-controls .label {
+  font-size: 2em;
+  text-align: center;
+}
+.board-controls .btn-add-task {
+  position: sticky;
+  right: 20px;
+  top: 20px;
+  padding: 5px;
+}
+
+/*# sourceMappingURL=/board.46cc0964.css.map */

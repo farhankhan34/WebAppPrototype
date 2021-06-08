@@ -136,6 +136,7 @@ export default class Task {
         // Give a unique id for each task
         this.taskID = 'T:' + Number(Task.allTasks.length + 1 ) ;
         this.startTime = 0;
+        this.endTime = 0;
 
         }
     toJSON(){
@@ -149,6 +150,7 @@ export default class Task {
             "priority": this.priority ,
             "completionStatus": this.completionStatus,
             "lastStartTime": this.startTime,
+            "lastEndTime": this.endTime,
         }
     }
 

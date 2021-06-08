@@ -35,17 +35,29 @@ export default class FlowTimer {
     //    console.log(JSON.stringify(dateTime));
     }
 
-    static startStopWatch(){ 
-        FlowTimer.$stopWatchTime = 0;
-        FlowTimer.$stopWatchState = 'running';
-
+    static onButtonWatchClicked($me){ 
         let $runningTask = Task.getRunningTask();
-        $runningTask[0].startTime = new Date();
-        console.log(JSON.stringify($runningTask));
+       // let $btnWatchStart  = document.getElementById("btn-watch-start") ;     
+
+        if( FlowTimer.$stopWatchState == 'stop') {
+            $runningTask[0].startTime = new Date();
+            FlowTimer.$stopWatchTime = 0;
+            FlowTimer.$stopWatchState = 'running';
+            $me.startStopButton.textContent = "Stop";            
+            $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Recording";
+        }
+        else{
+            $runningTask[0].endTime = new Date();
+            FlowTimer.$stopWatchTime = 0;
+            FlowTimer.$stopWatchState = 'stop';
+            $me.startStopButton.textContent = "Start";
+            $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Stopped";
+        }
+
 
     }
 
-    static stopStopWatch(){ 
+    static stopWatch(){ 
         FlowTimer.$stopWatchState = 'stop';
     }
 
@@ -54,6 +66,10 @@ export default class FlowTimer {
         let timerDiv =  document.createElement('div');
         timerDiv.setAttribute('class','flow-timer-div');
 
+        this.taskDetails =  document.createElement('div');
+        this.taskDetails.setAttribute('class','task-details');
+        this.taskDetails.innerHTML = "No task running!";
+        timerDiv.appendChild(this.taskDetails);
         
 
         /* Clock Display */
@@ -65,17 +81,26 @@ export default class FlowTimer {
            
         /*  creating start and stop buttons for stop watch */
         
-        let startButton = document.createElement('button');
-        startButton.textContent = "S";
-        startButton.taskObject = this;
-        startButton.addEventListener('click',FlowTimer.startStopWatch,false);
-        timerDiv.appendChild(startButton);
+        let toolboxDiv =  document.createElement('div');
+        toolboxDiv.setAttribute('class','flow-timer-toolbox');
+        this.startStopButton = document.createElement('button');
+        this.startStopButton.textContent = "Start";        
+        this.startStopButton.setAttribute('class','btn btn-start');    
+       // this.startStopButton.setAttribute('id','btn-watch-start');    
+        let taskObject = this;
+        this.startStopButton.addEventListener('click',function(){FlowTimer.onButtonWatchClicked( taskObject);});
 
+        toolboxDiv.appendChild(this.startStopButton);
+        timerDiv.appendChild(toolboxDiv);
+
+        /*
         let stopButton = document.createElement('button');
-        stopButton.textContent = "X";
+        stopButton.textContent = "Stop";
         stopButton.taskObject = this;
+        stopButton.setAttribute('class','btn btn-stop');
         stopButton.addEventListener('click',FlowTimer.stopStopWatch,false);
         timerDiv.appendChild(stopButton);
+        */
         
 
         /* search results display box */
@@ -85,7 +110,7 @@ export default class FlowTimer {
         searchResults.setAttribute('class','search-results');
         dictionaryDiv.appendChild(searchResults);
         */
-        this.board.boardLane.appendChild(timerDiv);
+        this.board.toolBoxSection.appendChild(timerDiv);
 
     }
 

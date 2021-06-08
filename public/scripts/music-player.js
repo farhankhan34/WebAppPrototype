@@ -233,7 +233,7 @@ export default class MusicPlayer {
         musicPlayerDiv.appendChild($theClone);
         $thePlayer.remove();
 
-        this.board.boardLane.appendChild(musicPlayerDiv); 
+        this.board.toolBoxSection.appendChild(musicPlayerDiv); 
 
         /* event binding */
         //playpauseTrack

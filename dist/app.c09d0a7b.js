@@ -148,6 +148,7 @@ var Task = /*#__PURE__*/function () {
 
     this.taskID = 'T:' + Number(Task.allTasks.length + 1);
     this.startTime = 0;
+    this.endTime = 0;
   }
 
   _createClass(Task, [{
@@ -162,7 +163,8 @@ var Task = /*#__PURE__*/function () {
         "completionTime": this.completionTime,
         "priority": this.priority,
         "completionStatus": this.completionStatus,
-        "lastStartTime": this.startTime
+        "lastStartTime": this.startTime,
+        "lastEndTime": this.endTime
       };
     }
   }, {
@@ -554,7 +556,7 @@ var MusicPlayer = /*#__PURE__*/function () {
       var $theClone = $thePlayer.cloneNode(true);
       musicPlayerDiv.appendChild($theClone);
       $thePlayer.remove();
-      this.board.boardLane.appendChild(musicPlayerDiv);
+      this.board.toolBoxSection.appendChild(musicPlayerDiv);
       /* event binding */
       //playpauseTrack
 
@@ -644,7 +646,7 @@ var Dictionary = /*#__PURE__*/function () {
       searchResults.setAttribute('id', 'search-results');
       searchResults.setAttribute('class', 'search-results');
       dictionaryDiv.appendChild(searchResults);
-      this.board.boardLane.appendChild(dictionaryDiv);
+      this.board.toolBoxSection.appendChild(dictionaryDiv);
     }
   }], [{
     key: "lookUp",
@@ -753,6 +755,10 @@ var FlowTimer = /*#__PURE__*/function () {
     value: function render() {
       var timerDiv = document.createElement('div');
       timerDiv.setAttribute('class', 'flow-timer-div');
+      this.taskDetails = document.createElement('div');
+      this.taskDetails.setAttribute('class', 'task-details');
+      this.taskDetails.innerHTML = "No task running!";
+      timerDiv.appendChild(this.taskDetails);
       /* Clock Display */
 
       var clockDisplay = document.createElement('div');
@@ -761,16 +767,27 @@ var FlowTimer = /*#__PURE__*/function () {
       timerDiv.appendChild(clockDisplay);
       /*  creating start and stop buttons for stop watch */
 
-      var startButton = document.createElement('button');
-      startButton.textContent = "S";
-      startButton.taskObject = this;
-      startButton.addEventListener('click', FlowTimer.startStopWatch, false);
-      timerDiv.appendChild(startButton);
-      var stopButton = document.createElement('button');
-      stopButton.textContent = "X";
+      var toolboxDiv = document.createElement('div');
+      toolboxDiv.setAttribute('class', 'flow-timer-toolbox');
+      this.startStopButton = document.createElement('button');
+      this.startStopButton.textContent = "Start";
+      this.startStopButton.setAttribute('class', 'btn btn-start'); // this.startStopButton.setAttribute('id','btn-watch-start');    
+
+      var taskObject = this;
+      this.startStopButton.addEventListener('click', function () {
+        FlowTimer.onButtonWatchClicked(taskObject);
+      });
+      toolboxDiv.appendChild(this.startStopButton);
+      timerDiv.appendChild(toolboxDiv);
+      /*
+      let stopButton = document.createElement('button');
+      stopButton.textContent = "Stop";
       stopButton.taskObject = this;
-      stopButton.addEventListener('click', FlowTimer.stopStopWatch, false);
+      stopButton.setAttribute('class','btn btn-stop');
+      stopButton.addEventListener('click',FlowTimer.stopStopWatch,false);
       timerDiv.appendChild(stopButton);
+      */
+
       /* search results display box */
 
       /*
@@ -780,7 +797,7 @@ var FlowTimer = /*#__PURE__*/function () {
       dictionaryDiv.appendChild(searchResults);
       */
 
-      this.board.boardLane.appendChild(timerDiv);
+      this.board.toolBoxSection.appendChild(timerDiv);
     }
   }], [{
     key: "tick",
@@ -801,19 +818,28 @@ var FlowTimer = /*#__PURE__*/function () {
 
     }
   }, {
-    key: "startStopWatch",
-    value: function startStopWatch() {
-      FlowTimer.$stopWatchTime = 0;
-      FlowTimer.$stopWatchState = 'running';
+    key: "onButtonWatchClicked",
+    value: function onButtonWatchClicked($me) {
+      var $runningTask = _task.default.getRunningTask(); // let $btnWatchStart  = document.getElementById("btn-watch-start") ;     
 
-      var $runningTask = _task.default.getRunningTask();
 
-      $runningTask[0].startTime = new Date();
-      console.log(JSON.stringify($runningTask));
+      if (FlowTimer.$stopWatchState == 'stop') {
+        $runningTask[0].startTime = new Date();
+        FlowTimer.$stopWatchTime = 0;
+        FlowTimer.$stopWatchState = 'running';
+        $me.startStopButton.textContent = "Stop";
+        $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Recording";
+      } else {
+        $runningTask[0].endTime = new Date();
+        FlowTimer.$stopWatchTime = 0;
+        FlowTimer.$stopWatchState = 'stop';
+        $me.startStopButton.textContent = "Start";
+        $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Stopped";
+      }
     }
   }, {
-    key: "stopStopWatch",
-    value: function stopStopWatch() {
+    key: "stopWatch",
+    value: function stopWatch() {
       FlowTimer.$stopWatchState = 'stop';
     }
   }]);
@@ -855,6 +881,20 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var Board = /*#__PURE__*/function () {
+  /*
+      static onTaskDragOver($event){
+          $event.preventDefault();
+          console.log('It on over...');
+      }
+      
+     static onTaskDropped($event) {
+      $event.preventDefault();
+      var taskId = $event.taskOnMove.getData("taskId");
+      $event.target.appendChild(document.getElementById(taskId));
+      console.log('Dropped!');
+     }
+  */
+
   /************************************************************************
    *      specific to the object instances                                *
    *                                                                      */
@@ -897,8 +937,43 @@ var Board = /*#__PURE__*/function () {
       this.boardLane = document.createElement('div');
       this.boardLane.setAttribute('id', this.boardID);
       this.boardLane.setAttribute('class', 'board');
-      this.boardLane.setAttribute('class', 'droptarget'); //this.boardLane.addEventListener('ondrop',Board.onTaskDropped);
-      //this.boardLane.addEventListener('ondragover',Board.onTaskDragOver);
+      this.boardLane.setAttribute('class', 'droptarget');
+      /********* add control section   **********/
+
+      var controlSection = document.createElement('div');
+      controlSection.setAttribute('class', 'board-controls');
+      this.boardLane.appendChild(controlSection);
+      /* add a label for the board */
+
+      var boardLabel = document.createElement('div');
+      boardLabel.setAttribute('class', 'label');
+      boardLabel.innerHTML = this.name;
+      controlSection.appendChild(boardLabel);
+      /* add a Task Add button for the board */
+
+      /* <input type="button" name="addTask" id="addTask" value="Add"> */
+
+      var addTaskButton = document.createElement('button');
+      addTaskButton.setAttribute('class', 'btn-add-task');
+      addTaskButton.textContent = "+";
+      addTaskButton.boardObject = this;
+      addTaskButton.addEventListener('click', Board.taskAddUI, false);
+      controlSection.appendChild(addTaskButton);
+      /******************* end of control section ****************/
+
+      /************ add a toolbox section ******************/
+
+      this.toolBoxSection = document.createElement('div');
+      this.toolBoxSection.setAttribute('class', 'board-toolbox');
+      this.boardLane.appendChild(this.toolBoxSection);
+      /* add a placeholder for the all tasks */
+
+      this.tasks = document.createElement('div');
+      this.tasks.setAttribute('class', 'all-tasks');
+      this.tasks.innerHTML = "Put all tasks in here!";
+      this.boardLane.appendChild(this.tasks);
+      container.appendChild(this.boardLane);
+      /*************** add drag and Drop functions  ******************/
 
       this.boardLane.addEventListener("drop", function ($event) {
         $event.preventDefault();
@@ -911,40 +986,15 @@ var Board = /*#__PURE__*/function () {
 
           var $taskOnMove = _task.default.allTasks.filter(function (task) {
             return task.taskID == $taskID;
-          }); //console.log("old board id " +  JSON.stringify($taskOnMove[0].board.boardID));
-          //console.log("New board id " + $event.target.id);
-
+          });
 
           $taskOnMove[0].board = $event.target;
         }
       });
       this.boardLane.addEventListener("dragover", function (event) {
-        //var data = event.dataTransfer.getData("Text");
-        //console.log("ID" + data);
         event.preventDefault();
       });
-      /* add a label for the board */
-
-      var boardLabel = document.createElement('div');
-      boardLabel.setAttribute('class', 'label');
-      boardLabel.innerHTML = this.name;
-      this.boardLane.appendChild(boardLabel);
-      /* add a Task Add button for the board */
-
-      /* <input type="button" name="addTask" id="addTask" value="Add"> */
-
-      var addTaskButton = document.createElement('button');
-      addTaskButton.textContent = "+";
-      addTaskButton.boardObject = this;
-      addTaskButton.addEventListener('click', Board.taskAddUI, false);
-      this.boardLane.appendChild(addTaskButton);
-      /* add a label for the board */
-
-      this.tasks = document.createElement('div');
-      this.tasks.setAttribute('class', 'all-tasks');
-      this.tasks.innerHTML = "Put all tasks in here!";
-      this.boardLane.appendChild(this.tasks);
-      container.appendChild(this.boardLane);
+      /******************** end of drag and drop functions ***************/
     }
   }], [{
     key: "add",
@@ -970,20 +1020,6 @@ var Board = /*#__PURE__*/function () {
     value: function taskAddUI($event) {
       //alert($event.currentTarget.boardObject.name);
       _task.default.taskAddForm($event.currentTarget.boardObject);
-    }
-  }, {
-    key: "onTaskDragOver",
-    value: function onTaskDragOver($event) {
-      $event.preventDefault();
-      console.log('It on over...');
-    }
-  }, {
-    key: "onTaskDropped",
-    value: function onTaskDropped($event) {
-      $event.preventDefault();
-      var taskId = $event.taskOnMove.getData("taskId");
-      $event.target.appendChild(document.getElementById(taskId));
-      console.log('Dropped!');
     }
   }]);
 
@@ -1766,13 +1802,16 @@ _board.default.renderAll($id_to_pass);
 
 /* for development */
 
+/*
+let $taskName = "TEST Task"; 
+let $dueDate = "17/05/20201";
+let $eta = "3days";
+let $completionTime = ""; 
+let $priority = "3";
+let $completionStatus = "new";
+*/
 
-var $taskName = "TEST Task";
-var $dueDate = "17/05/20201";
-var $eta = "3days";
-var $completionTime = "";
-var $priority = "3";
-var $completionStatus = "new";
+
 $doing.addFlowTimer();
 $doing.addDictionary();
 $doing.addMusicPlayer();
@@ -1818,7 +1857,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56199" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59804" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

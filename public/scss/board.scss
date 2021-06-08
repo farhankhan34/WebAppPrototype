@@ -1,0 +1,13 @@
+.board-controls {
+    border: 3px solid gray;
+    .label {
+        font-size: 2em;
+        text-align: center;
+    }
+    .btn-add-task{
+        position:sticky;
+        right: 20px;
+        top: 20px;
+        padding: 5px;
+    }
+}
