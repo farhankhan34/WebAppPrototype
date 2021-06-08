@@ -147,8 +147,9 @@ export default class Board {
         let $theBoard = this;
         this.boardLane.addEventListener("drop", function($event) {
             
+            //console.log($event.target.getAttribute('data-web-app'));
             $event.preventDefault();
-            //if ( $event.target. == "droptarget" ) {
+            if ( $event.target.getAttribute('data-web-app') == "board" ) {
               
               let $taskDomID = $event.dataTransfer.getData("Text");
               let $taskElement = document.getElementById($taskDomID);
@@ -162,7 +163,7 @@ export default class Board {
               const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
               $taskOnMove[0].board = $theBoard;
               $taskOnMove[0].storeTask();
-            //}
+            }
           });
 
 

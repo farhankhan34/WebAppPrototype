@@ -989,21 +989,24 @@ var Board = /*#__PURE__*/function () {
 
       var $theBoard = this;
       this.boardLane.addEventListener("drop", function ($event) {
-        $event.preventDefault(); //if ( $event.target. == "droptarget" ) {
+        //console.log($event.target.getAttribute('data-web-app'));
+        $event.preventDefault();
 
-        var $taskDomID = $event.dataTransfer.getData("Text");
-        var $taskElement = document.getElementById($taskDomID);
-        $event.target.appendChild($taskElement);
-        $taskElement.style.opacity = "1";
-        console.log("Task DOM ID " + $taskDomID);
-        var $taskID = Number($taskDomID.replace('T:', '')); //finally attache the new board object with the task
+        if ($event.target.getAttribute('data-web-app') == "board") {
+          var $taskDomID = $event.dataTransfer.getData("Text");
+          var $taskElement = document.getElementById($taskDomID);
+          $event.target.appendChild($taskElement);
+          $taskElement.style.opacity = "1";
+          console.log("Task DOM ID " + $taskDomID);
+          var $taskID = Number($taskDomID.replace('T:', '')); //finally attache the new board object with the task
 
-        var $taskOnMove = _task.default.allTasks.filter(function (task) {
-          return task.taskID == $taskID;
-        });
+          var $taskOnMove = _task.default.allTasks.filter(function (task) {
+            return task.taskID == $taskID;
+          });
 
-        $taskOnMove[0].board = $theBoard;
-        $taskOnMove[0].storeTask(); //}
+          $taskOnMove[0].board = $theBoard;
+          $taskOnMove[0].storeTask();
+        }
       });
       this.boardLane.addEventListener("dragover", function (event) {
         event.preventDefault();
@@ -1891,7 +1894,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60442" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51200" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

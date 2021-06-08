@@ -1,7 +1,7 @@
 .flow-timer-div {
   position: relative;
   margin: 1rem;
-  padding-bottom: calc(2em + 60px);
+  padding-bottom: calc(1em + 6px);
   background: white;
   box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
   border-radius: 12px;
