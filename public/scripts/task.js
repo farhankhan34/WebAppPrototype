@@ -33,7 +33,7 @@ export default class Task {
                 /* add the newly created task into the task list */        
                 Task.allTasks.push(newTask);
                 newTask.render();
-               console.log(Task.allTasks.length);
+                //console.log(Task.allTasks.length);
 
                 //if(Task.allTasks.length <5)
                 //return true;
@@ -51,27 +51,31 @@ export default class Task {
 
     static unrenderAll(){
         // let container = document.getElementById();
+        
          Task.allTasks.forEach(function(task){
              task.unRender();
            });
+         
      }
 
-    static removeTask($event){        
+    static removeTask($taskObject){        
         
        // console.log($event);
        // console.log($event.currentTarget);
        // console.log($event.currentTarget.taskObject);
 
-        alert("Delete Task '" + $event.currentTarget.taskID + "' ?");
+        alert("Do you want to delete Task '" + $taskObject.taskName + "' with ID = " +  $taskObject.taskID + "?");
         //Task.allTasks.pop();
 
 
-        const result = Task.allTasks.filter(task => task.taskID != $event.currentTarget.taskObject.taskID);
+        const result = Task.allTasks.filter(task => task.taskID != $taskObject.taskID);
 
-        Task.allTasks = result;
+        //console.log(result);
 
         Task.unrenderAll();
+        Task.allTasks = result;
         Task.renderAll();
+        $taskObject.disposeTask();
        
     }
 
@@ -85,7 +89,7 @@ export default class Task {
 
          let $taskName =  document.getElementById("cardName").value;
          let $dueDate = document.getElementById("cardDueDate").value;
-         let $eta = "3days";
+         let $eta = "3 days";
          let $completionTime = ""; 
          let $priority = "3";
          let $completionStatus = "new";
@@ -134,7 +138,7 @@ export default class Task {
         this.completionStatus = $completionStatus;
         this.board = $board;
         // Give a unique id for each task
-        this.taskID = 'T:' + Number(Task.allTasks.length + 1 ) ;
+        this.taskID = Number(Task.allTasks.length + 1 ) ;
         this.startTime = 0;
         this.endTime = 0;
 
@@ -158,8 +162,15 @@ export default class Task {
        // console.log(JSON.stringify(this));
         window.localStorage.setItem(this.taskID, JSON.stringify(this));
 
-        let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
-        window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+        //let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
+        //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+    }
+
+    disposeTask(){
+        window.localStorage.removeItem(this.taskID);
+
+        //let $totalNoOfTasks = Number(Task.allTasks.length ) ;
+        //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
     }
 
 
@@ -168,7 +179,8 @@ export default class Task {
 
         let taskDiv =  document.createElement('div');
         taskDiv.setAttribute('class','card');
-        taskDiv.setAttribute('id',this.taskID);
+        let $domTaskID = 'T:' + this.taskID;
+        taskDiv.setAttribute('id',$domTaskID);
 
         taskDiv.setAttribute('draggable','true');
         
@@ -183,6 +195,16 @@ export default class Task {
             
         };
         
+        let deleteButton = document.createElement('button');
+        deleteButton.setAttribute('class','btn-delete-task');
+        deleteButton.textContent = "X";        
+
+        /* I need a reference of the task object(this) that created this delete button */
+        /* taskObject is to remeber this when we move out of the context */
+        let $taskObject = this;
+
+        deleteButton.addEventListener('click',function(){Task.removeTask($taskObject);},false);        
+        taskDiv.appendChild(deleteButton);
 
         let taskText = document.createElement('h3');
         taskText.textContent = this.taskName;
@@ -192,15 +214,7 @@ export default class Task {
         taskDate.textContent = this.dueDate;
         taskDiv.appendChild(taskDate);
 
-        let deleteButton = document.createElement('button');
-        deleteButton.textContent = "Delete Task";        
 
-        /* I need a reference of the task object(this) that created this delete button */
-        /* taskObject is to remeber this when we move out of the context */
-        deleteButton.taskObject = this;
-
-        deleteButton.addEventListener('click',Task.removeTask,false);        
-        taskDiv.appendChild(deleteButton);
 
         this.board.tasks.appendChild(taskDiv);
 
@@ -212,6 +226,7 @@ export default class Task {
     unRender() {
         this.board.tasks.innerHTML = '';
     }
+    
 
   static taskAddForm($theBoard){
       

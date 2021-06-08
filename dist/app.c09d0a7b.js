@@ -146,7 +146,7 @@ var Task = /*#__PURE__*/function () {
     this.completionStatus = $completionStatus;
     this.board = $board; // Give a unique id for each task
 
-    this.taskID = 'T:' + Number(Task.allTasks.length + 1);
+    this.taskID = Number(Task.allTasks.length + 1);
     this.startTime = 0;
     this.endTime = 0;
   }
@@ -171,16 +171,22 @@ var Task = /*#__PURE__*/function () {
     key: "storeTask",
     value: function storeTask() {
       // console.log(JSON.stringify(this));
-      window.localStorage.setItem(this.taskID, JSON.stringify(this));
-      var $totalNoOfTasks = Number(Task.allTasks.length + 1);
-      window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+      window.localStorage.setItem(this.taskID, JSON.stringify(this)); //let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
+      //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+    }
+  }, {
+    key: "disposeTask",
+    value: function disposeTask() {
+      window.localStorage.removeItem(this.taskID); //let $totalNoOfTasks = Number(Task.allTasks.length ) ;
+      //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
     }
   }, {
     key: "render",
     value: function render() {
       var taskDiv = document.createElement('div');
       taskDiv.setAttribute('class', 'card');
-      taskDiv.setAttribute('id', this.taskID);
+      var $domTaskID = 'T:' + this.taskID;
+      taskDiv.setAttribute('id', $domTaskID);
       taskDiv.setAttribute('draggable', 'true');
 
       taskDiv.ondragstart = function ($event) {
@@ -193,21 +199,24 @@ var Task = /*#__PURE__*/function () {
         console.log(JSON.stringify(result));
       };
 
+      var deleteButton = document.createElement('button');
+      deleteButton.setAttribute('class', 'btn-delete-task');
+      deleteButton.textContent = "X";
+      /* I need a reference of the task object(this) that created this delete button */
+
+      /* taskObject is to remeber this when we move out of the context */
+
+      var $taskObject = this;
+      deleteButton.addEventListener('click', function () {
+        Task.removeTask($taskObject);
+      }, false);
+      taskDiv.appendChild(deleteButton);
       var taskText = document.createElement('h3');
       taskText.textContent = this.taskName;
       taskDiv.appendChild(taskText);
       var taskDate = document.createElement('p');
       taskDate.textContent = this.dueDate;
       taskDiv.appendChild(taskDate);
-      var deleteButton = document.createElement('button');
-      deleteButton.textContent = "Delete Task";
-      /* I need a reference of the task object(this) that created this delete button */
-
-      /* taskObject is to remeber this when we move out of the context */
-
-      deleteButton.taskObject = this;
-      deleteButton.addEventListener('click', Task.removeTask, false);
-      taskDiv.appendChild(deleteButton);
       this.board.tasks.appendChild(taskDiv); // alert('Rendered!');
     }
   }, {
@@ -229,8 +238,8 @@ var Task = /*#__PURE__*/function () {
       /* add the newly created task into the task list */
 
       Task.allTasks.push(newTask);
-      newTask.render();
-      console.log(Task.allTasks.length); //if(Task.allTasks.length <5)
+      newTask.render(); //console.log(Task.allTasks.length);
+      //if(Task.allTasks.length <5)
       //return true;
       //Task.unrenderAll();
       //Task.renderAll();
@@ -253,18 +262,20 @@ var Task = /*#__PURE__*/function () {
     }
   }, {
     key: "removeTask",
-    value: function removeTask($event) {
+    value: function removeTask($taskObject) {
       // console.log($event);
       // console.log($event.currentTarget);
       // console.log($event.currentTarget.taskObject);
-      alert("Delete Task '" + $event.currentTarget.taskID + "' ?"); //Task.allTasks.pop();
+      alert("Do you want to delete Task '" + $taskObject.taskName + "' with ID = " + $taskObject.taskID + "?"); //Task.allTasks.pop();
 
       var result = Task.allTasks.filter(function (task) {
-        return task.taskID != $event.currentTarget.taskObject.taskID;
-      });
-      Task.allTasks = result;
+        return task.taskID != $taskObject.taskID;
+      }); //console.log(result);
+
       Task.unrenderAll();
+      Task.allTasks = result;
       Task.renderAll();
+      $taskObject.disposeTask();
     }
   }, {
     key: "getRunningTask",
@@ -278,7 +289,7 @@ var Task = /*#__PURE__*/function () {
     value: function saveTask($event) {
       var $taskName = document.getElementById("cardName").value;
       var $dueDate = document.getElementById("cardDueDate").value;
-      var $eta = "3days";
+      var $eta = "3 days";
       var $completionTime = "";
       var $priority = "3";
       var $completionStatus = "new";
@@ -902,14 +913,13 @@ var Board = /*#__PURE__*/function () {
     _classCallCheck(this, Board);
 
     this.name = name;
-    this.boardID = 'B:' + Number(Board.allBoards.length + 1);
+    this.boardID = Number(Board.allBoards.length + 1);
   }
 
   _createClass(Board, [{
     key: "addTask",
     value: function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
-      console.log("Board ID : " + this.boardID);
-
+      //  console.log("Board ID : " + this.boardID);
       _task.default.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, this);
     }
   }, {
@@ -935,9 +945,11 @@ var Board = /*#__PURE__*/function () {
     value: function render(container) {
       /* add a swimline (column) as a board */
       this.boardLane = document.createElement('div');
-      this.boardLane.setAttribute('id', this.boardID);
-      this.boardLane.setAttribute('class', 'board');
-      this.boardLane.setAttribute('class', 'droptarget');
+      var $domBoardID = 'B:' + this.boardID;
+      this.boardLane.setAttribute('id', $domBoardID);
+      this.boardLane.setAttribute('class', 'board droptarget'); //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
+
+      this.boardLane.setAttribute('data-web-app', 'board');
       /********* add control section   **********/
 
       var controlSection = document.createElement('div');
@@ -954,7 +966,7 @@ var Board = /*#__PURE__*/function () {
       /* <input type="button" name="addTask" id="addTask" value="Add"> */
 
       var addTaskButton = document.createElement('button');
-      addTaskButton.setAttribute('class', 'btn-add-task');
+      addTaskButton.setAttribute('class', 'btn btn-add-task');
       addTaskButton.textContent = "+";
       addTaskButton.boardObject = this;
       addTaskButton.addEventListener('click', Board.taskAddUI, false);
@@ -969,27 +981,29 @@ var Board = /*#__PURE__*/function () {
       /* add a placeholder for the all tasks */
 
       this.tasks = document.createElement('div');
-      this.tasks.setAttribute('class', 'all-tasks');
-      this.tasks.innerHTML = "Put all tasks in here!";
+      this.tasks.setAttribute('class', 'all-tasks'); //this.tasks.innerHTML =  "Put all tasks in here!";
+
       this.boardLane.appendChild(this.tasks);
       container.appendChild(this.boardLane);
       /*************** add drag and Drop functions  ******************/
 
+      var $theBoard = this;
       this.boardLane.addEventListener("drop", function ($event) {
-        $event.preventDefault();
+        $event.preventDefault(); //if ( $event.target. == "droptarget" ) {
 
-        if ($event.target.className == "droptarget") {
-          var $taskID = $event.dataTransfer.getData("Text");
-          var $taskElement = document.getElementById($taskID);
-          $event.target.appendChild($taskElement);
-          $taskElement.style.opacity = "1"; //finally attache the new board object with the task
+        var $taskDomID = $event.dataTransfer.getData("Text");
+        var $taskElement = document.getElementById($taskDomID);
+        $event.target.appendChild($taskElement);
+        $taskElement.style.opacity = "1";
+        console.log("Task DOM ID " + $taskDomID);
+        var $taskID = Number($taskDomID.replace('T:', '')); //finally attache the new board object with the task
 
-          var $taskOnMove = _task.default.allTasks.filter(function (task) {
-            return task.taskID == $taskID;
-          });
+        var $taskOnMove = _task.default.allTasks.filter(function (task) {
+          return task.taskID == $taskID;
+        });
 
-          $taskOnMove[0].board = $event.target;
-        }
+        $taskOnMove[0].board = $theBoard;
+        $taskOnMove[0].storeTask(); //}
       });
       this.boardLane.addEventListener("dragover", function (event) {
         event.preventDefault();
@@ -1814,19 +1828,39 @@ let $completionStatus = "new";
 
 $doing.addFlowTimer();
 $doing.addDictionary();
-$doing.addMusicPlayer();
-var $totalNoOfTasks = Number(window.localStorage.getItem('totalNoOfTasks'));
-console.log('$totalNoOfTasks -> ' + $totalNoOfTasks);
-var i;
+$doing.addMusicPlayer(); //let $totalNoOfTasks = Number( window.localStorage.getItem('totalNoOfTasks'));
+//console.log('$totalNoOfTasks -> ' + $totalNoOfTasks);
+//let i;
 
+/*
 for (i = 1; i <= $totalNoOfTasks; i++) {
-  var $taskKey = 'T:' + i;
-  var $task = JSON.parse(window.localStorage.getItem($taskKey));
-  var $board = $toDo; //console.log($task.boardID);
+   let $taskKey =  'T:' + i;
+   let $task= JSON.parse(window.localStorage.getItem($taskKey));
+   let $board = $toDo;
+    //console.log($task.boardID);
+    if($task.boardID == 'B:1') $board = $toDo;
+    if($task.boardID == 'B:2') $board = $doing;
+    if($task.boardID == 'B:3') $board = $done;
 
-  if ($task.boardID == 'B:1') $board = $toDo;
-  if ($task.boardID == 'B:2') $board = $doing;
-  if ($task.boardID == 'B:3') $board = $done;
+    $board.addTask(  $task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus   );
+
+}
+*/
+//var archive = {}, // Notice change here
+
+var keys = Object.keys(localStorage);
+var i = keys.length;
+
+while (i--) {
+  var $taskKey = keys[i];
+  console.log("Key = " + $taskKey);
+  var $task = JSON.parse(localStorage.getItem($taskKey));
+  console.log($task);
+  console.log($task.boardID);
+  var $board = $toDo;
+  if ($task.boardID == 1) $board = $toDo;
+  if ($task.boardID == 2) $board = $doing;
+  if ($task.boardID == 3) $board = $done;
   $board.addTask($task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus);
 }
 },{"./board":"scripts/board.js","regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -1857,7 +1891,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59804" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60442" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
