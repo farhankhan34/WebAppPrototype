@@ -30,19 +30,11 @@ export default class Board {
         Task.taskAddForm($event.currentTarget.boardObject);
         
     }
-/*
-    static onTaskDragOver($event){
-        $event.preventDefault();
-        console.log('It on over...');
+
+    static getBoardById($boardID){
+        return Board.allBoards.filter(board => board.boardID === $boardID)[0];
     }
-    
-   static onTaskDropped($event) {
-    $event.preventDefault();
-    var taskId = $event.taskOnMove.getData("taskId");
-    $event.target.appendChild(document.getElementById(taskId));
-    console.log('Dropped!');
-   }
-*/
+
     /************************************************************************
      *      specific to the object instances                                *
      *                                                                      */
@@ -51,27 +43,7 @@ export default class Board {
         this.boardID =  Number( Board.allBoards.length + 1 );
     }
 
-    addTask(
-        $taskName, 
-        $dueDate, 
-        $eta, 
-        $completionTime, 
-        $priority, 
-        $completionStatus        
-    )
-    {
-      //  console.log("Board ID : " + this.boardID);
-
-        Task.add(
-            $taskName, 
-            $dueDate, 
-            $eta, 
-            $completionTime, 
-            $priority, 
-            $completionStatus,
-            this);
-            
-    }
+  
 
     addMusicPlayer(){
         this.musicPlayer = new MusicPlayer(this);
@@ -96,7 +68,7 @@ export default class Board {
         this.boardLane =  document.createElement('div');
         let $domBoardID = 'B:' + this.boardID;
         this.boardLane.setAttribute('id',$domBoardID);        
-        this.boardLane.setAttribute('class','board droptarget');
+        this.boardLane.setAttribute('class','board');
 
         //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
         this.boardLane.setAttribute('data-web-app','board');
@@ -136,7 +108,7 @@ export default class Board {
 
         /* add a placeholder for the all tasks */
         this.tasks =  document.createElement('div');
-        this.tasks.setAttribute('class','all-tasks');
+        this.tasks.setAttribute('class','all-tasks droptarget');
         //this.tasks.innerHTML =  "Put all tasks in here!";
 
         this.boardLane.appendChild(this.tasks);
@@ -146,6 +118,7 @@ export default class Board {
         /*************** add drag and Drop functions  ******************/
         let $theBoard = this;
         this.boardLane.addEventListener("drop", function($event) {
+           
             
             //console.log($event.target.getAttribute('data-web-app'));
             $event.preventDefault();
@@ -163,6 +136,13 @@ export default class Board {
               const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
               $taskOnMove[0].board = $theBoard;
               $taskOnMove[0].storeTask();
+            }
+            else{
+                let $taskDomID = $event.dataTransfer.getData("Text");
+                console.log("Task DOM id " + $taskDomID);             
+                let $taskElement = document.getElementById($taskDomID);              
+                $taskElement.style.opacity = "1";
+                return false;
             }
           });
 

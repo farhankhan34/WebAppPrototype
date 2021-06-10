@@ -117,13 +117,82 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"scripts/task.js":[function(require,module,exports) {
+})({"scripts/service/database.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Database = /*#__PURE__*/function () {
+  function Database() {
+    _classCallCheck(this, Database);
+  }
+
+  _createClass(Database, null, [{
+    key: "createTask",
+    value: function createTask($task) {
+      window.localStorage.setItem($task.taskID, JSON.stringify($task));
+    }
+  }, {
+    key: "readTask",
+    value: function readTask() {
+      console.log("Not implemented ... ");
+    }
+  }, {
+    key: "updateTask",
+    value: function updateTask($task) {
+      window.localStorage.setItem($task.taskID, JSON.stringify($task));
+    }
+  }, {
+    key: "deleteTask",
+    value: function deleteTask($taskID) {
+      window.localStorage.removeItem($taskID);
+    }
+  }, {
+    key: "readAllTasks",
+    value: function readAllTasks() {
+      var taskList = [];
+      var keys = Object.keys(localStorage);
+      var i = keys.length;
+
+      while (i--) {
+        var $taskKey = keys[i];
+        var $task = JSON.parse(localStorage.getItem($taskKey));
+        taskList.push($task);
+        console.log("Key = " + $taskKey);
+        console.log($task);
+        console.log($task.boardID);
+      }
+
+      return taskList;
+    }
+  }]);
+
+  return Database;
+}();
+
+exports.default = Database;
+},{}],"scripts/task.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _database = _interopRequireDefault(require("./service/database"));
+
+var _board = _interopRequireDefault(require("./board"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -159,7 +228,7 @@ var Task = /*#__PURE__*/function () {
         "boardID": this.board.boardID,
         "taskName": this.taskName,
         "dueDate": this.dueDate,
-        "etc": this.eta,
+        "eta": this.eta,
         "completionTime": this.completionTime,
         "priority": this.priority,
         "completionStatus": this.completionStatus,
@@ -168,40 +237,71 @@ var Task = /*#__PURE__*/function () {
       };
     }
   }, {
-    key: "storeTask",
-    value: function storeTask() {
-      // console.log(JSON.stringify(this));
-      window.localStorage.setItem(this.taskID, JSON.stringify(this)); //let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
-      //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
-    }
-  }, {
-    key: "disposeTask",
-    value: function disposeTask() {
-      window.localStorage.removeItem(this.taskID); //let $totalNoOfTasks = Number(Task.allTasks.length ) ;
-      //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+    key: "toggleView",
+    value: function toggleView() {
+      if (this.detailsButton.textContent == '▼') {
+        this.detailsButton.textContent = '▲';
+        this.detailsBlock.setAttribute('class', 'task-details-block');
+      } else {
+        this.detailsButton.textContent = '▼';
+        this.detailsBlock.setAttribute('class', 'hidden');
+      }
     }
   }, {
     key: "render",
     value: function render() {
+      this.sesameOpen = true;
       var taskDiv = document.createElement('div');
       taskDiv.setAttribute('class', 'card');
       var $domTaskID = 'T:' + this.taskID;
       taskDiv.setAttribute('id', $domTaskID);
       taskDiv.setAttribute('draggable', 'true');
+      /*****************TASK NAME AT THE TOP  *************/
 
-      taskDiv.ondragstart = function ($event) {
-        $event.dataTransfer.setData("Text", $event.target.id);
-        $event.target.style.opacity = "0.4"; //Show the board name on console
+      var heroLine = document.createElement('div');
+      heroLine.setAttribute('class', 'task-hero');
+      /************ TOOLBAR ON TASK  **********************/
 
-        var result = Task.allTasks.filter(function (task) {
-          return task.taskID == $event.target.id;
-        });
-        console.log(JSON.stringify(result));
-      };
-
+      var toolBar = document.createElement('div');
+      toolBar.setAttribute('class', 'task-toolbar');
+      this.detailsButton = document.createElement('button');
+      this.detailsButton.setAttribute('class', 'btn-icon');
+      this.detailsButton.textContent = '▲';
       var deleteButton = document.createElement('button');
-      deleteButton.setAttribute('class', 'btn-delete-task');
+      deleteButton.setAttribute('class', 'btn-icon');
       deleteButton.textContent = "X";
+      var heroText = document.createElement('span');
+      heroText.setAttribute('class', 'hero-text');
+      heroText.textContent = this.taskName;
+      this.detailsBlock = document.createElement('div');
+      this.detailsBlock.setAttribute('class', 'task-details-block');
+      /************ Task details are shown here *************/
+
+      var taskDate = document.createElement('p');
+      taskDate.textContent = "Due date: " + this.dueDate;
+      var taskETA = document.createElement('p');
+      taskETA.textContent = "Estimated Time: " + this.eta;
+      var taskPriority = document.createElement('p');
+      taskPriority.textContent = "Priority: " + this.priority;
+      var taskStartTime = document.createElement('p');
+      taskStartTime.textContent = "Start time: " + this.startTime;
+      var taskEndTime = document.createElement('p');
+      taskEndTime.textContent = "End time: " + this.endTime;
+      /************* add to dom  **********************/
+
+      heroLine.appendChild(heroText);
+      toolBar.appendChild(this.detailsButton);
+      toolBar.appendChild(deleteButton);
+      taskDiv.appendChild(heroLine);
+      taskDiv.appendChild(toolBar);
+      this.detailsBlock.appendChild(taskDate);
+      this.detailsBlock.appendChild(taskETA);
+      this.detailsBlock.appendChild(taskStartTime);
+      this.detailsBlock.appendChild(taskEndTime);
+      taskDiv.appendChild(this.detailsBlock);
+      this.board.tasks.appendChild(taskDiv);
+      /* ******************** ADD EVENT HANDLERS *************************************/
+
       /* I need a reference of the task object(this) that created this delete button */
 
       /* taskObject is to remeber this when we move out of the context */
@@ -210,39 +310,50 @@ var Task = /*#__PURE__*/function () {
       deleteButton.addEventListener('click', function () {
         Task.removeTask($taskObject);
       }, false);
-      taskDiv.appendChild(deleteButton);
-      var taskText = document.createElement('h3');
-      taskText.textContent = this.taskName;
-      taskDiv.appendChild(taskText);
-      var taskDate = document.createElement('p');
-      taskDate.textContent = this.dueDate;
-      taskDiv.appendChild(taskDate);
-      this.board.tasks.appendChild(taskDiv); // alert('Rendered!');
+      this.detailsButton.addEventListener('click', function () {
+        $taskObject.toggleView();
+      }, false);
+      /*************** drag & drop of tasks between boards (Drag starts here) ************************/
+
+      taskDiv.ondragstart = function ($event) {
+        console.log("$event.target.id = " + $event.target.id);
+        $event.dataTransfer.setData("Text", $event.target.id);
+        $event.target.style.opacity = "0.4"; //Show the board name on console
+        //const result = Task.allTasks.filter(task => task.taskID == $event.target.id);
+        //console.log(JSON.stringify(result));            
+      };
     }
   }, {
     key: "unRender",
     value: function unRender() {
       this.board.tasks.innerHTML = '';
     }
+  }, {
+    key: "reRender",
+    value: function reRender() {
+      this.unRender();
+      this.render();
+    }
   }], [{
-    key: "add",
+    key: "getAllTask",
     value:
     /************************************************************************
      *      static is common to all instances since they're called          *
      *      on the class itself.                                            */
-    function add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
-      /* create a new task using the supplied info */
-      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board); //console.log(JSON.stringify($board));
 
-      newTask.storeTask();
-      /* add the newly created task into the task list */
+    /************* get all tasks from persistent store *****************/
+    function getAllTask() {
+      var $tasks = _database.default.readAllTasks();
 
-      Task.allTasks.push(newTask);
-      newTask.render(); //console.log(Task.allTasks.length);
-      //if(Task.allTasks.length <5)
-      //return true;
-      //Task.unrenderAll();
-      //Task.renderAll();
+      for (var $taskIndex in $tasks) {
+        var $task = $tasks[$taskIndex];
+
+        var $board = _board.default.getBoardById($task.boardID);
+
+        var $newTask = new Task($task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus, $board);
+        $newTask.render();
+        Task.allTasks.push($newTask);
+      }
     }
   }, {
     key: "renderAll",
@@ -263,40 +374,53 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "removeTask",
     value: function removeTask($taskObject) {
-      // console.log($event);
-      // console.log($event.currentTarget);
-      // console.log($event.currentTarget.taskObject);
-      alert("Do you want to delete Task '" + $taskObject.taskName + "' with ID = " + $taskObject.taskID + "?"); //Task.allTasks.pop();
+      var yes = confirm("Do you want to delete Task '" + $taskObject.taskName + "?");
 
-      var result = Task.allTasks.filter(function (task) {
-        return task.taskID != $taskObject.taskID;
-      }); //console.log(result);
+      if (yes == true) {
+        var result = Task.allTasks.filter(function (task) {
+          return task.taskID != $taskObject.taskID;
+        });
+        Task.unrenderAll();
+        Task.allTasks = result;
+        Task.renderAll();
 
-      Task.unrenderAll();
-      Task.allTasks = result;
-      Task.renderAll();
-      $taskObject.disposeTask();
+        _database.default.deleteTask($taskObject.taskID);
+      }
     }
   }, {
     key: "getRunningTask",
     value: function getRunningTask() {
-      return Task.allTasks.filter(function (task) {
-        return task.board.boardID == "B:2";
+      var filtered = Task.allTasks.filter(function (task) {
+        return task.board.boardID == 2;
       });
+      if (filtered && filtered[0]) return filtered[0];else return false;
     }
+    /************ create a new task from the supplied info of the form */
+
   }, {
     key: "saveTask",
     value: function saveTask($event) {
+      /*** read form inputs ***/
       var $taskName = document.getElementById("cardName").value;
       var $dueDate = document.getElementById("cardDueDate").value;
-      var $eta = "3 days";
-      var $completionTime = "";
-      var $priority = "3";
+      var $eta = document.getElementById("cardETA").value;
+      var $completionTime = document.getElementById("cardCompletionTime").value;
+      var $priority = document.getElementById("cardPriority").value;
       var $completionStatus = "new";
-      Task.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $event.currentTarget.boardObject); // getElementById('taskEntryForm').parentNode.removeChild(getElementById('taskEntryForm'));
+      /*** remove the form as all data is read into memory**/
 
       var element = document.getElementById("taskEntryForm");
       element.parentNode.removeChild(element);
+      var $board = $event.currentTarget.boardObject;
+      /* create a new task using the supplied info */
+
+      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board);
+      /* add the newly created task into the task list */
+
+      Task.allTasks.push(newTask);
+      newTask.render();
+
+      _database.default.createTask(newTask);
     }
   }, {
     key: "onDragStart",
@@ -328,10 +452,22 @@ var Task = /*#__PURE__*/function () {
       var cardCompletionTime = document.createElement('input');
       cardCompletionTime.setAttribute('id', 'cardCompletionTime');
       cardForm.appendChild(cardCompletionTime);
+      var cardPriority = document.createElement('input');
+      cardPriority.setAttribute('id', 'cardPriority');
+      cardPriority.setAttribute('type', 'text');
+      cardForm.appendChild(cardPriority);
+      var cardStartTime = document.createElement('input');
+      cardStartTime.setAttribute('id', 'cardStartTime');
+      cardStartTime.setAttribute('type', 'text');
+      cardForm.appendChild(cardStartTime);
+      var cardEndTime = document.createElement('input');
+      cardEndTime.setAttribute('id', 'cardEndTime');
+      cardEndTime.setAttribute('type', 'text');
+      cardForm.appendChild(cardEndTime);
       var saveButton = document.createElement('button');
       saveButton.textContent = "Save";
       saveButton.boardObject = $theBoard;
-      saveButton.addEventListener('click', Task.saveTask, false);
+      saveButton.addEventListener('click', Task.saveTask);
       cardForm.appendChild(saveButton);
       $theBoard.boardLane.appendChild(taskEntryForm);
     }
@@ -343,7 +479,7 @@ var Task = /*#__PURE__*/function () {
 exports.default = Task;
 
 _defineProperty(Task, "allTasks", []);
-},{}],"scripts/music-player.js":[function(require,module,exports) {
+},{"./service/database":"scripts/service/database.js","./board":"scripts/board.js"}],"scripts/music-player.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -641,12 +777,14 @@ var Dictionary = /*#__PURE__*/function () {
       /*  creating search button */
 
       var searchButton = document.createElement('button');
-      searchButton.textContent = "Look Up";
+      searchButton.innerHTML = '<i class="fa fa-search fa-2x"></i>';
+      searchButton.setAttribute('class', 'search-icon');
       searchButton.taskObject = this;
       searchButton.addEventListener('click', Dictionary.lookUp, false);
       searchBox.appendChild(searchButton);
       var clearButton = document.createElement('button');
-      clearButton.textContent = "X";
+      clearButton.innerHTML = '<i class="fa fa-times fa-2x"></i>';
+      clearButton.setAttribute('class', 'search-icon');
       clearButton.taskObject = this;
       clearButton.addEventListener('click', Dictionary.clearSearchBox, false);
       searchBox.appendChild(clearButton);
@@ -834,18 +972,25 @@ var FlowTimer = /*#__PURE__*/function () {
       var $runningTask = _task.default.getRunningTask(); // let $btnWatchStart  = document.getElementById("btn-watch-start") ;     
 
 
+      if ($runningTask == false) {
+        alert('No runnung task!');
+        return false;
+      }
+
       if (FlowTimer.$stopWatchState == 'stop') {
-        $runningTask[0].startTime = new Date();
+        $runningTask.startTime = new Date();
         FlowTimer.$stopWatchTime = 0;
         FlowTimer.$stopWatchState = 'running';
         $me.startStopButton.textContent = "Stop";
-        $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Recording";
+        $me.taskDetails.innerHTML = $runningTask.taskName + " - Recording";
+        $runningTask.reRender();
       } else {
-        $runningTask[0].endTime = new Date();
+        $runningTask.endTime = new Date();
         FlowTimer.$stopWatchTime = 0;
         FlowTimer.$stopWatchState = 'stop';
         $me.startStopButton.textContent = "Start";
-        $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Stopped";
+        $me.taskDetails.innerHTML = $runningTask.taskName + " - Stopped";
+        $runningTask.reRender();
       }
     }
   }, {
@@ -892,20 +1037,6 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var Board = /*#__PURE__*/function () {
-  /*
-      static onTaskDragOver($event){
-          $event.preventDefault();
-          console.log('It on over...');
-      }
-      
-     static onTaskDropped($event) {
-      $event.preventDefault();
-      var taskId = $event.taskOnMove.getData("taskId");
-      $event.target.appendChild(document.getElementById(taskId));
-      console.log('Dropped!');
-     }
-  */
-
   /************************************************************************
    *      specific to the object instances                                *
    *                                                                      */
@@ -917,12 +1048,6 @@ var Board = /*#__PURE__*/function () {
   }
 
   _createClass(Board, [{
-    key: "addTask",
-    value: function addTask($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus) {
-      //  console.log("Board ID : " + this.boardID);
-      _task.default.add($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, this);
-    }
-  }, {
     key: "addMusicPlayer",
     value: function addMusicPlayer() {
       this.musicPlayer = new _musicPlayer.default(this);
@@ -947,7 +1072,7 @@ var Board = /*#__PURE__*/function () {
       this.boardLane = document.createElement('div');
       var $domBoardID = 'B:' + this.boardID;
       this.boardLane.setAttribute('id', $domBoardID);
-      this.boardLane.setAttribute('class', 'board droptarget'); //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
+      this.boardLane.setAttribute('class', 'board'); //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
 
       this.boardLane.setAttribute('data-web-app', 'board');
       /********* add control section   **********/
@@ -981,7 +1106,7 @@ var Board = /*#__PURE__*/function () {
       /* add a placeholder for the all tasks */
 
       this.tasks = document.createElement('div');
-      this.tasks.setAttribute('class', 'all-tasks'); //this.tasks.innerHTML =  "Put all tasks in here!";
+      this.tasks.setAttribute('class', 'all-tasks droptarget'); //this.tasks.innerHTML =  "Put all tasks in here!";
 
       this.boardLane.appendChild(this.tasks);
       container.appendChild(this.boardLane);
@@ -1006,6 +1131,15 @@ var Board = /*#__PURE__*/function () {
 
           $taskOnMove[0].board = $theBoard;
           $taskOnMove[0].storeTask();
+        } else {
+          var _$taskDomID = $event.dataTransfer.getData("Text");
+
+          console.log("Task DOM id " + _$taskDomID);
+
+          var _$taskElement = document.getElementById(_$taskDomID);
+
+          _$taskElement.style.opacity = "1";
+          return false;
         }
       });
       this.boardLane.addEventListener("dragover", function (event) {
@@ -1037,6 +1171,13 @@ var Board = /*#__PURE__*/function () {
     value: function taskAddUI($event) {
       //alert($event.currentTarget.boardObject.name);
       _task.default.taskAddForm($event.currentTarget.boardObject);
+    }
+  }, {
+    key: "getBoardById",
+    value: function getBoardById($boardID) {
+      return Board.allBoards.filter(function (board) {
+        return board.boardID === $boardID;
+      })[0];
     }
   }]);
 
@@ -1802,7 +1943,11 @@ try {
 
 var _board = _interopRequireDefault(require("./board"));
 
+var _task = _interopRequireDefault(require("./task"));
+
 require("regenerator-runtime/runtime");
+
+var _database = _interopRequireDefault(require("./service/database"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1815,58 +1960,13 @@ var $done = _board.default.add('Done');
 var $id_to_pass = 'app';
 
 _board.default.renderAll($id_to_pass);
-/* test data */
-
-/* for development */
-
-/*
-let $taskName = "TEST Task"; 
-let $dueDate = "17/05/20201";
-let $eta = "3days";
-let $completionTime = ""; 
-let $priority = "3";
-let $completionStatus = "new";
-*/
-
 
 $doing.addFlowTimer();
 $doing.addDictionary();
-$doing.addMusicPlayer(); //let $totalNoOfTasks = Number( window.localStorage.getItem('totalNoOfTasks'));
-//console.log('$totalNoOfTasks -> ' + $totalNoOfTasks);
-//let i;
+$doing.addMusicPlayer();
 
-/*
-for (i = 1; i <= $totalNoOfTasks; i++) {
-   let $taskKey =  'T:' + i;
-   let $task= JSON.parse(window.localStorage.getItem($taskKey));
-   let $board = $toDo;
-    //console.log($task.boardID);
-    if($task.boardID == 'B:1') $board = $toDo;
-    if($task.boardID == 'B:2') $board = $doing;
-    if($task.boardID == 'B:3') $board = $done;
-
-    $board.addTask(  $task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus   );
-
-}
-*/
-//var archive = {}, // Notice change here
-
-var keys = Object.keys(localStorage);
-var i = keys.length;
-
-while (i--) {
-  var $taskKey = keys[i];
-  console.log("Key = " + $taskKey);
-  var $task = JSON.parse(localStorage.getItem($taskKey));
-  console.log($task);
-  console.log($task.boardID);
-  var $board = $toDo;
-  if ($task.boardID == 1) $board = $toDo;
-  if ($task.boardID == 2) $board = $doing;
-  if ($task.boardID == 3) $board = $done;
-  $board.addTask($task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus);
-}
-},{"./board":"scripts/board.js","regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+_task.default.getAllTask();
+},{"./board":"scripts/board.js","./task":"scripts/task.js","regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./service/database":"scripts/service/database.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -1894,7 +1994,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51200" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64004" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

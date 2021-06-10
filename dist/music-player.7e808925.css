@@ -1,5 +1,7 @@
 .player-div {
   border: 3px solid blue;
+  border-radius: 12px;
+  margin: 1rem;
 }
 
 /* Using flex with the column direction to

@@ -1,4 +1,5 @@
 .dictionary-div {
+  z-index: 100;
   position: relative;
   margin: 1rem;
   padding-bottom: calc(2em + 60px);
@@ -13,13 +14,24 @@
 .search-box {
   position: relative;
   margin: 1rem;
-  padding-bottom: calc(2em + 60px);
+  padding-bottom: calc(1em);
   background: white;
   box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
   transition: all 0.3s linear;
-  border: 3px solid black;
+  padding: 0.7em;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  line-height: 1.7em;
+  background-color: none !important;
+  border-color: none !important;
+  width: 86%;
+  border-width: 0;
+  border-style: none !important;
 }
 
 .search-results {
@@ -28,10 +40,20 @@
   padding-bottom: calc(2em + 60px);
   background: white;
   box-shadow: 2px 4px 25px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border-radius: none;
   overflow: hidden;
   transition: all 0.3s linear;
-  border: 3px solid cyan;
+  border: none;
+  padding: 1em;
+}
+
+.search-icon {
+  border: none;
+  outline: none;
+  background-color: transparent !important;
+  border-color: none !important;
+  border-width: 0;
+  border-style: none !important;
 }
 
 /*# sourceMappingURL=/dictionary.1c0d58aa.css.map */

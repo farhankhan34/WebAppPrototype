@@ -1,3 +1,6 @@
+import Database from "./service/database";
+import Board from './board';
+
 export default class Task {
     
     /************************************************************************
@@ -7,39 +10,18 @@ export default class Task {
 
     static allTasks = [];
    
-    static add(
-                $taskName, 
-                $dueDate, 
-                $eta, 
-                $completionTime, 
-                $priority, 
-                $completionStatus,
-                $board)
-                {
-                    /* create a new task using the supplied info */
-                var newTask = new Task( $taskName, 
-                                        $dueDate, 
-                                        $eta, 
-                                        $completionTime, 
-                                        $priority, 
-                                        $completionStatus,
-                                        $board);
-
-                //console.log(JSON.stringify($board));
-
-                newTask.storeTask();
-
-
-                /* add the newly created task into the task list */        
-                Task.allTasks.push(newTask);
-                newTask.render();
-                //console.log(Task.allTasks.length);
-
-                //if(Task.allTasks.length <5)
-                //return true;
-
-                //Task.unrenderAll();
-                //Task.renderAll();
+    /************* get all tasks from persistent store *****************/
+    static getAllTask(){
+        let $tasks =   Database.readAllTasks();
+        
+        for ( const $taskIndex in $tasks) {                     
+            let $task = $tasks[$taskIndex];
+            let $board = Board.getBoardById($task.boardID);
+            var $newTask = new Task($task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus, $board);
+            $newTask.render();
+            Task.allTasks.push($newTask);
+          }         
+         
     }
 
     static renderAll(){
@@ -60,55 +42,55 @@ export default class Task {
 
     static removeTask($taskObject){        
         
-       // console.log($event);
-       // console.log($event.currentTarget);
-       // console.log($event.currentTarget.taskObject);
 
-        alert("Do you want to delete Task '" + $taskObject.taskName + "' with ID = " +  $taskObject.taskID + "?");
-        //Task.allTasks.pop();
+        let yes = confirm("Do you want to delete Task '" + $taskObject.taskName + "?");
 
-
-        const result = Task.allTasks.filter(task => task.taskID != $taskObject.taskID);
-
-        //console.log(result);
-
-        Task.unrenderAll();
-        Task.allTasks = result;
-        Task.renderAll();
-        $taskObject.disposeTask();
+        if(yes == true)  {   
+            const result = Task.allTasks.filter(task => task.taskID != $taskObject.taskID);
+            Task.unrenderAll();
+            Task.allTasks = result;
+            Task.renderAll();            
+            Database.deleteTask($taskObject.taskID);
+        }
        
     }
 
     static getRunningTask(){
-        return Task.allTasks.filter(task => task.board.boardID == "B:2");
+        let filtered = Task.allTasks.filter(task => task.board.boardID == 2);
+        if(filtered && filtered[0]) return filtered[0];
+        else return false;
     }
 
+    /************ create a new task from the supplied info of the form */
     static saveTask($event){        
         
         
-
+        /*** read form inputs ***/
          let $taskName =  document.getElementById("cardName").value;
          let $dueDate = document.getElementById("cardDueDate").value;
-         let $eta = "3 days";
-         let $completionTime = ""; 
-         let $priority = "3";
+         let $eta = document.getElementById("cardETA").value;
+         let $completionTime = document.getElementById("cardCompletionTime").value;
+         let $priority = document.getElementById("cardPriority").value;
          let $completionStatus = "new";
 
-         
-         Task.add(
-            $taskName, 
-            $dueDate, 
-            $eta, 
-            $completionTime, 
-            $priority, 
-            $completionStatus,
-            $event.currentTarget.boardObject);
-            
-           // getElementById('taskEntryForm').parentNode.removeChild(getElementById('taskEntryForm'));
+       /*** remove the form as all data is read into memory**/    
+         var element = document.getElementById("taskEntryForm");
+         element.parentNode.removeChild(element);
 
-            var element = document.getElementById("taskEntryForm");
-            element.parentNode.removeChild(element);
-            
+         let $board =  $event.currentTarget.boardObject;
+         /* create a new task using the supplied info */
+              var newTask = new Task(   $taskName, 
+                                        $dueDate, 
+                                        $eta, 
+                                        $completionTime, 
+                                        $priority, 
+                                        $completionStatus,
+                                        $board);
+
+                /* add the newly created task into the task list */        
+                Task.allTasks.push(newTask);
+                newTask.render();
+                Database.createTask(newTask);                
         
      }
 
@@ -141,7 +123,7 @@ export default class Task {
         this.taskID = Number(Task.allTasks.length + 1 ) ;
         this.startTime = 0;
         this.endTime = 0;
-
+        
         }
     toJSON(){
         return {
@@ -149,7 +131,7 @@ export default class Task {
             "boardID": this.board.boardID,
             "taskName": this.taskName ,
             "dueDate": this.dueDate,
-            "etc": this.eta ,
+            "eta": this.eta ,
             "completionTime": this.completionTime ,
             "priority": this.priority ,
             "completionStatus": this.completionStatus,
@@ -158,67 +140,106 @@ export default class Task {
         }
     }
 
-    storeTask(){
-       // console.log(JSON.stringify(this));
-        window.localStorage.setItem(this.taskID, JSON.stringify(this));
+   
+    toggleView(){
+       if( this.detailsButton.textContent == '▼') {
+        this.detailsButton.textContent = '▲';
+        this.detailsBlock.setAttribute('class','task-details-block');
+       }
+       else{
+        this.detailsButton.textContent = '▼';
+        this.detailsBlock.setAttribute('class','hidden');
+       }
 
-        //let $totalNoOfTasks = Number(Task.allTasks.length + 1 ) ;
-        //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
+       
     }
-
-    disposeTask(){
-        window.localStorage.removeItem(this.taskID);
-
-        //let $totalNoOfTasks = Number(Task.allTasks.length ) ;
-        //window.localStorage.setItem('totalNoOfTasks', $totalNoOfTasks.toString());
-    }
-
-
 
     render()  {
-
+        this.sesameOpen = true;
         let taskDiv =  document.createElement('div');
         taskDiv.setAttribute('class','card');
         let $domTaskID = 'T:' + this.taskID;
         taskDiv.setAttribute('id',$domTaskID);
-
         taskDiv.setAttribute('draggable','true');
+      
+        /*****************TASK NAME AT THE TOP  *************/
+        let heroLine = document.createElement('div');
+        heroLine.setAttribute('class','task-hero');
         
+        /************ TOOLBAR ON TASK  **********************/
+        let toolBar = document.createElement('div');
+        toolBar.setAttribute('class','task-toolbar');
 
+        this.detailsButton = document.createElement('button');
+        this.detailsButton.setAttribute('class','btn-icon');
+        this.detailsButton.textContent =  '▲';
+        
+        let deleteButton = document.createElement('button');
+        deleteButton.setAttribute('class','btn-icon');
+        deleteButton.textContent = "X";        
+
+      
+        let heroText = document.createElement('span');
+        heroText.setAttribute('class','hero-text');
+        heroText.textContent = this.taskName;
+        
+        this.detailsBlock = document.createElement('div');
+        this.detailsBlock.setAttribute('class','task-details-block');
+
+        /************ Task details are shown here *************/
+        let taskDate = document.createElement('p');
+        taskDate.textContent = "Due date: " + this.dueDate;
+
+        let taskETA = document.createElement('p');
+        taskETA.textContent = "Estimated Time: " + this.eta;
+
+        let taskPriority = document.createElement('p');
+        taskPriority.textContent = "Priority: " + this.priority;
+
+        let taskStartTime = document.createElement('p');
+        taskStartTime.textContent = "Start time: " + this.startTime;
+
+        let taskEndTime = document.createElement('p');
+        taskEndTime.textContent = "End time: " + this.endTime;
+
+
+
+
+        /************* add to dom  **********************/
+        heroLine.appendChild(heroText);
+        toolBar.appendChild(this.detailsButton);
+        toolBar.appendChild(deleteButton);
+
+        taskDiv.appendChild(heroLine);
+        taskDiv.appendChild(toolBar);
+
+        this.detailsBlock.appendChild(taskDate);
+        this.detailsBlock.appendChild(taskETA);
+        this.detailsBlock.appendChild(taskStartTime);
+        this.detailsBlock.appendChild(taskEndTime);
+        taskDiv.appendChild(this.detailsBlock);
+
+        this.board.tasks.appendChild(taskDiv);
+
+         
+        /* ******************** ADD EVENT HANDLERS *************************************/
+        /* I need a reference of the task object(this) that created this delete button */
+        /* taskObject is to remeber this when we move out of the context */
+        let $taskObject = this;
+        deleteButton.addEventListener('click',function(){Task.removeTask($taskObject);},false);    
+        
+        this.detailsButton.addEventListener('click', function(){$taskObject.toggleView();},false);
+     
+        /*************** drag & drop of tasks between boards (Drag starts here) ************************/
         taskDiv.ondragstart = function($event){
+            console.log("$event.target.id = " + $event.target.id );
             $event.dataTransfer.setData("Text", $event.target.id);                    
             $event.target.style.opacity = "0.4";
 
             //Show the board name on console
-            const result = Task.allTasks.filter(task => task.taskID == $event.target.id);
-            console.log(JSON.stringify(result));
-            
+            //const result = Task.allTasks.filter(task => task.taskID == $event.target.id);
+            //console.log(JSON.stringify(result));            
         };
-        
-        let deleteButton = document.createElement('button');
-        deleteButton.setAttribute('class','btn-delete-task');
-        deleteButton.textContent = "X";        
-
-        /* I need a reference of the task object(this) that created this delete button */
-        /* taskObject is to remeber this when we move out of the context */
-        let $taskObject = this;
-
-        deleteButton.addEventListener('click',function(){Task.removeTask($taskObject);},false);        
-        taskDiv.appendChild(deleteButton);
-
-        let taskText = document.createElement('h3');
-        taskText.textContent = this.taskName;
-        taskDiv.appendChild(taskText);
-
-        let taskDate = document.createElement('p');
-        taskDate.textContent = this.dueDate;
-        taskDiv.appendChild(taskDate);
-
-
-
-        this.board.tasks.appendChild(taskDiv);
-
-       // alert('Rendered!');
         
 
     }
@@ -227,6 +248,10 @@ export default class Task {
         this.board.tasks.innerHTML = '';
     }
     
+    reRender() {
+        this.unRender();
+        this.render();
+    }
 
   static taskAddForm($theBoard){
       
@@ -257,13 +282,28 @@ export default class Task {
 
         let cardCompletionTime = document.createElement('input');
         cardCompletionTime.setAttribute('id','cardCompletionTime');
-        cardForm.appendChild(cardCompletionTime)
+        cardForm.appendChild(cardCompletionTime);
+
+        let cardPriority = document.createElement('input');
+        cardPriority.setAttribute('id', 'cardPriority');
+        cardPriority.setAttribute('type','text');
+        cardForm.appendChild(cardPriority);
+
+        let cardStartTime = document.createElement('input');
+        cardStartTime.setAttribute('id', 'cardStartTime');
+        cardStartTime.setAttribute('type','text');
+        cardForm.appendChild(cardStartTime);
+
+        let cardEndTime = document.createElement('input');
+        cardEndTime.setAttribute('id', 'cardEndTime');
+        cardEndTime.setAttribute('type','text');
+        cardForm.appendChild(cardEndTime);
 
         let saveButton = document.createElement('button');
         saveButton.textContent = "Save";      
         saveButton.boardObject = $theBoard;         
 
-        saveButton.addEventListener('click',Task.saveTask,false);        
+        saveButton.addEventListener('click',Task.saveTask);        
         cardForm.appendChild(saveButton);
 
 

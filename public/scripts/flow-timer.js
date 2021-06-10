@@ -39,19 +39,25 @@ export default class FlowTimer {
         let $runningTask = Task.getRunningTask();
        // let $btnWatchStart  = document.getElementById("btn-watch-start") ;     
 
+       if($runningTask == false) {alert('No runnung task!'); return false;}
+
         if( FlowTimer.$stopWatchState == 'stop') {
-            $runningTask[0].startTime = new Date();
+            $runningTask.startTime = new Date();
             FlowTimer.$stopWatchTime = 0;
             FlowTimer.$stopWatchState = 'running';
             $me.startStopButton.textContent = "Stop";            
-            $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Recording";
+            $me.taskDetails.innerHTML = $runningTask.taskName + " - Recording";
+
+            $runningTask.reRender();
         }
         else{
-            $runningTask[0].endTime = new Date();
+            $runningTask.endTime = new Date();
             FlowTimer.$stopWatchTime = 0;
             FlowTimer.$stopWatchState = 'stop';
             $me.startStopButton.textContent = "Start";
-            $me.taskDetails.innerHTML = $runningTask[0].taskName + " - Stopped";
+            $me.taskDetails.innerHTML = $runningTask.taskName + " - Stopped";
+
+            $runningTask.reRender();
         }
 
 

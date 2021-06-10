@@ -110,13 +110,15 @@ export default class Dictionary {
 
         /*  creating search button */
         let searchButton = document.createElement('button');
-        searchButton.textContent = "Look Up";
+        searchButton.innerHTML = '<i class="fa fa-search fa-2x"></i>';
+        searchButton.setAttribute('class','search-icon');
         searchButton.taskObject = this;
         searchButton.addEventListener('click',Dictionary.lookUp,false);
         searchBox.appendChild(searchButton);
-
+        
         let clearButton = document.createElement('button');
-        clearButton.textContent = "X";
+        clearButton.innerHTML ='<i class="fa fa-times fa-2x"></i>';
+        clearButton.setAttribute('class','search-icon');
         clearButton.taskObject = this;
         clearButton.addEventListener('click',Dictionary.clearSearchBox,false);
         searchBox.appendChild(clearButton);
