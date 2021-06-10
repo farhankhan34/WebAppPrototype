@@ -180,6 +180,75 @@ var Database = /*#__PURE__*/function () {
 }();
 
 exports.default = Database;
+},{}],"scripts/helper/ui.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var UI = /*#__PURE__*/function () {
+  function UI() {
+    _classCallCheck(this, UI);
+  }
+
+  _createClass(UI, null, [{
+    key: "createControl",
+    value: function createControl($type, $label, $id, $css_style, $place_holder) {
+      var itemDiv = document.createElement("Div");
+      /*** the control block */
+
+      var item = document.createElement('input');
+      item.setAttribute('id', $id);
+      item.setAttribute('type', $type);
+      item.setAttribute('placeholder', $place_holder);
+      itemDiv.appendChild(item);
+      return itemDiv;
+    }
+  }, {
+    key: "createControlWithLabel",
+    value: function createControlWithLabel($type, $label, $id, $css_style, $place_holder) {
+      var itemDiv = document.createElement("Div");
+      /**** the label block ***/
+
+      var itemLabel = document.createElement("Label");
+      itemLabel.setAttribute('for', $id);
+      itemLabel.innerHTML = $label + ": ";
+      itemDiv.appendChild(itemLabel);
+      /*** the control block */
+
+      var item = document.createElement('input');
+      item.setAttribute('id', $id);
+      item.setAttribute('type', $type);
+      item.setAttribute('placeholder', $place_holder);
+      itemDiv.appendChild(item);
+      return itemDiv;
+    }
+  }, {
+    key: "createHero",
+    value: function createHero($text) {
+      /*****************TASK NAME AT THE TOP  *************/
+      var heroLine = document.createElement('div');
+      heroLine.setAttribute('class', 'hero-div');
+      var heroText = document.createElement('span');
+      heroText.setAttribute('class', 'hero-text');
+      heroText.textContent = $text;
+      heroLine.appendChild(heroText);
+      return heroLine;
+    }
+  }]);
+
+  return UI;
+}();
+
+exports.default = UI;
 },{}],"scripts/task.js":[function(require,module,exports) {
 "use strict";
 
@@ -191,6 +260,8 @@ exports.default = void 0;
 var _database = _interopRequireDefault(require("./service/database"));
 
 var _board = _interopRequireDefault(require("./board"));
+
+var _ui = _interopRequireDefault(require("./helper/ui"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -218,6 +289,7 @@ var Task = /*#__PURE__*/function () {
     this.taskID = Number(Task.allTasks.length + 1);
     this.startTime = 0;
     this.endTime = 0;
+    this.showingDetails = false;
   }
 
   _createClass(Task, [{
@@ -239,12 +311,14 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "toggleView",
     value: function toggleView() {
-      if (this.detailsButton.textContent == '▼') {
-        this.detailsButton.textContent = '▲';
+      if (this.showingDetails == true) {
+        this.detailsButton.innerHTML = '<i class="fa fa-angle-up fa-2x"></i>';
         this.detailsBlock.setAttribute('class', 'task-details-block');
+        this.showingDetails = false;
       } else {
-        this.detailsButton.textContent = '▼';
+        this.detailsButton.innerHTML = '<i class="fa fa-angle-down fa-2x"></i>';
         this.detailsBlock.setAttribute('class', 'hidden');
+        this.showingDetails = true;
       }
     }
   }, {
@@ -266,10 +340,10 @@ var Task = /*#__PURE__*/function () {
       toolBar.setAttribute('class', 'task-toolbar');
       this.detailsButton = document.createElement('button');
       this.detailsButton.setAttribute('class', 'btn-icon');
-      this.detailsButton.textContent = '▲';
+      this.detailsButton.innerHTML = '<i class="fa fa-angle-up fa-2x"></i>';
       var deleteButton = document.createElement('button');
       deleteButton.setAttribute('class', 'btn-icon');
-      deleteButton.textContent = "X";
+      deleteButton.innerHTML = '<i class="fa fa-times fa-2x"></i>';
       var heroText = document.createElement('span');
       heroText.setAttribute('class', 'hero-text');
       heroText.textContent = this.taskName;
@@ -399,19 +473,19 @@ var Task = /*#__PURE__*/function () {
 
   }, {
     key: "saveTask",
-    value: function saveTask($event) {
+    value: function saveTask($board) {
       /*** read form inputs ***/
       var $taskName = document.getElementById("cardName").value;
       var $dueDate = document.getElementById("cardDueDate").value;
       var $eta = document.getElementById("cardETA").value;
-      var $completionTime = document.getElementById("cardCompletionTime").value;
+      var $completionTime = 0;
       var $priority = document.getElementById("cardPriority").value;
       var $completionStatus = "new";
       /*** remove the form as all data is read into memory**/
 
       var element = document.getElementById("taskEntryForm");
-      element.parentNode.removeChild(element);
-      var $board = $event.currentTarget.boardObject;
+      element.parentNode.removeChild(element); // let $board =  $event.currentTarget.boardObject;
+
       /* create a new task using the supplied info */
 
       var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board);
@@ -432,43 +506,50 @@ var Task = /*#__PURE__*/function () {
     value: function taskAddForm($theBoard) {
       //    alert('Created by ' + $theBoard.name) ;
       var taskEntryForm = document.createElement('div');
-      taskEntryForm.setAttribute('class', 'card card-form-div');
+      taskEntryForm.setAttribute('class', 'task-entry-form');
       taskEntryForm.setAttribute('id', 'taskEntryForm');
-      var cardForm = document.createElement('div');
-      cardForm.setAttribute('id', 'cardForm');
-      taskEntryForm.appendChild(cardForm);
-      var cardName = document.createElement('input');
-      cardName.setAttribute('id', 'cardName');
-      cardName.setAttribute('type', 'text');
-      cardForm.appendChild(cardName);
-      var cardDueDate = document.createElement('input');
-      cardDueDate.setAttribute('id', 'cardDueDate');
-      cardDueDate.setAttribute('type', 'date');
-      cardForm.appendChild(cardDueDate);
-      var cardETA = document.createElement('input');
-      cardETA.setAttribute('id', 'cardETA');
-      cardETA.setAttribute('type', 'date');
-      cardForm.appendChild(cardETA);
-      var cardCompletionTime = document.createElement('input');
-      cardCompletionTime.setAttribute('id', 'cardCompletionTime');
-      cardForm.appendChild(cardCompletionTime);
-      var cardPriority = document.createElement('input');
-      cardPriority.setAttribute('id', 'cardPriority');
-      cardPriority.setAttribute('type', 'text');
-      cardForm.appendChild(cardPriority);
-      var cardStartTime = document.createElement('input');
-      cardStartTime.setAttribute('id', 'cardStartTime');
-      cardStartTime.setAttribute('type', 'text');
-      cardForm.appendChild(cardStartTime);
-      var cardEndTime = document.createElement('input');
-      cardEndTime.setAttribute('id', 'cardEndTime');
-      cardEndTime.setAttribute('type', 'text');
-      cardForm.appendChild(cardEndTime);
+      var deleteButton = document.createElement('button');
+      deleteButton.setAttribute('class', 'close-task-icon');
+      deleteButton.innerHTML = '<i class="fa fa-times fa-2x"></i>'; //  let hero = UI.createHero("New Task");
+      //  taskEntryForm.appendChild(hero);
+      //let toolBar = document.createElement('div');
+      //toolBar.setAttribute('class','task-toolbar');             
+      //toolBar.appendChild(deleteButton);
+
+      taskEntryForm.appendChild(deleteButton);
+
+      var cardName = _ui.default.createControl('text', 'Name', 'cardName', 'task-name', 'Task name');
+
+      taskEntryForm.appendChild(cardName);
+
+      var cardDueDate = _ui.default.createControlWithLabel('date', 'Due date', 'cardDueDate', 'due-date', 'Enter due date');
+
+      taskEntryForm.appendChild(cardDueDate);
+
+      var cardETA = _ui.default.createControlWithLabel('number', 'ETA', 'cardETA', 'eta', 'in hours');
+
+      taskEntryForm.appendChild(cardETA);
+
+      var cardPriority = _ui.default.createControlWithLabel('number', 'Task Priority', 'cardPriority', 'priority', 'Put 1-9,1 for low and  9 for max');
+
+      taskEntryForm.appendChild(cardPriority);
+      /*
+       let saveButton = document.createElement('button');
+      saveButton.textContent = "Save";      
+      saveButton.boardObject = $theBoard;         
+       saveButton.addEventListener('click',Task.saveTask);        
+      taskEntryForm.appendChild(saveButton);
+      */
+
       var saveButton = document.createElement('button');
-      saveButton.textContent = "Save";
-      saveButton.boardObject = $theBoard;
-      saveButton.addEventListener('click', Task.saveTask);
-      cardForm.appendChild(saveButton);
+      saveButton.innerHTML = '<i class="fa fa-check fa-2x"></i>';
+      saveButton.setAttribute('class', 'save-task-icon'); //saveButton.boardObject = $theBoard; 
+      //saveButton.addEventListener('click',Task.saveTask,false);
+
+      saveButton.addEventListener('click', function () {
+        Task.saveTask($theBoard);
+      }, false);
+      taskEntryForm.appendChild(saveButton);
       $theBoard.boardLane.appendChild(taskEntryForm);
     }
   }]);
@@ -479,7 +560,7 @@ var Task = /*#__PURE__*/function () {
 exports.default = Task;
 
 _defineProperty(Task, "allTasks", []);
-},{"./service/database":"scripts/service/database.js","./board":"scripts/board.js"}],"scripts/music-player.js":[function(require,module,exports) {
+},{"./service/database":"scripts/service/database.js","./board":"scripts/board.js","./helper/ui":"scripts/helper/ui.js"}],"scripts/music-player.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1994,7 +2075,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64004" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59560" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,5 +1,6 @@
 import Database from "./service/database";
 import Board from './board';
+import UI from './helper/ui';
 
 export default class Task {
     
@@ -62,14 +63,14 @@ export default class Task {
     }
 
     /************ create a new task from the supplied info of the form */
-    static saveTask($event){        
+    static saveTask($board){        
         
         
         /*** read form inputs ***/
          let $taskName =  document.getElementById("cardName").value;
          let $dueDate = document.getElementById("cardDueDate").value;
          let $eta = document.getElementById("cardETA").value;
-         let $completionTime = document.getElementById("cardCompletionTime").value;
+         let $completionTime = 0; 
          let $priority = document.getElementById("cardPriority").value;
          let $completionStatus = "new";
 
@@ -77,7 +78,7 @@ export default class Task {
          var element = document.getElementById("taskEntryForm");
          element.parentNode.removeChild(element);
 
-         let $board =  $event.currentTarget.boardObject;
+        // let $board =  $event.currentTarget.boardObject;
          /* create a new task using the supplied info */
               var newTask = new Task(   $taskName, 
                                         $dueDate, 
@@ -123,6 +124,7 @@ export default class Task {
         this.taskID = Number(Task.allTasks.length + 1 ) ;
         this.startTime = 0;
         this.endTime = 0;
+        this.showingDetails = false;
         
         }
     toJSON(){
@@ -142,13 +144,15 @@ export default class Task {
 
    
     toggleView(){
-       if( this.detailsButton.textContent == '▼') {
-        this.detailsButton.textContent = '▲';
+       if(this.showingDetails == true) {        
+        this.detailsButton.innerHTML ='<i class="fa fa-angle-up fa-2x"></i>';
         this.detailsBlock.setAttribute('class','task-details-block');
+        this.showingDetails = false;
        }
        else{
-        this.detailsButton.textContent = '▼';
+        this.detailsButton.innerHTML ='<i class="fa fa-angle-down fa-2x"></i>';        
         this.detailsBlock.setAttribute('class','hidden');
+        this.showingDetails = true;
        }
 
        
@@ -171,12 +175,12 @@ export default class Task {
         toolBar.setAttribute('class','task-toolbar');
 
         this.detailsButton = document.createElement('button');
-        this.detailsButton.setAttribute('class','btn-icon');
-        this.detailsButton.textContent =  '▲';
+        this.detailsButton.setAttribute('class','btn-icon');       
+        this.detailsButton.innerHTML ='<i class="fa fa-angle-up fa-2x"></i>';
         
         let deleteButton = document.createElement('button');
         deleteButton.setAttribute('class','btn-icon');
-        deleteButton.textContent = "X";        
+        deleteButton.innerHTML ='<i class="fa fa-times fa-2x"></i>';        
 
       
         let heroText = document.createElement('span');
@@ -258,56 +262,65 @@ export default class Task {
 //    alert('Created by ' + $theBoard.name) ;
 
         let taskEntryForm =  document.createElement('div');
-        taskEntryForm.setAttribute('class','card card-form-div');
+        taskEntryForm.setAttribute('class','task-entry-form');
         taskEntryForm.setAttribute('id','taskEntryForm');
 
-        let cardForm = document.createElement('div');
-        cardForm.setAttribute ('id', 'cardForm');
-        taskEntryForm.appendChild(cardForm);
+        let deleteButton = document.createElement('button');
+        deleteButton.setAttribute('class','close-task-icon');
+        deleteButton.innerHTML ='<i class="fa fa-times fa-2x"></i>';      
+          
+             
 
-        let cardName = document.createElement('input');
-        cardName.setAttribute ('id', 'cardName');
-        cardName.setAttribute('type','text');
-        cardForm.appendChild(cardName);
+      //  let hero = UI.createHero("New Task");
+      //  taskEntryForm.appendChild(hero);
+       
+         //let toolBar = document.createElement('div');
+         //toolBar.setAttribute('class','task-toolbar');             
+         //toolBar.appendChild(deleteButton);
 
-        let cardDueDate = document.createElement('input');
-        cardDueDate.setAttribute('id','cardDueDate');
-        cardDueDate.setAttribute('type','date');
-        cardForm.appendChild(cardDueDate);
+         taskEntryForm.appendChild(deleteButton);
+      
+     
 
-        let cardETA = document.createElement('input');
-        cardETA.setAttribute('id','cardETA');
-        cardETA.setAttribute('type','date');
-        cardForm.appendChild(cardETA);
+        let cardName = UI.createControl('text','Name','cardName','task-name','Task name');
+        taskEntryForm.appendChild(cardName);
 
-        let cardCompletionTime = document.createElement('input');
-        cardCompletionTime.setAttribute('id','cardCompletionTime');
-        cardForm.appendChild(cardCompletionTime);
 
-        let cardPriority = document.createElement('input');
-        cardPriority.setAttribute('id', 'cardPriority');
-        cardPriority.setAttribute('type','text');
-        cardForm.appendChild(cardPriority);
 
-        let cardStartTime = document.createElement('input');
-        cardStartTime.setAttribute('id', 'cardStartTime');
-        cardStartTime.setAttribute('type','text');
-        cardForm.appendChild(cardStartTime);
 
-        let cardEndTime = document.createElement('input');
-        cardEndTime.setAttribute('id', 'cardEndTime');
-        cardEndTime.setAttribute('type','text');
-        cardForm.appendChild(cardEndTime);
+        let cardDueDate = UI.createControlWithLabel('date','Due date','cardDueDate','due-date','Enter due date');
+        taskEntryForm.appendChild(cardDueDate);
+
+
+        let cardETA = UI.createControlWithLabel('number','ETA','cardETA','eta','in hours');
+        taskEntryForm.appendChild(cardETA);
+
+        
+        let cardPriority = UI.createControlWithLabel('number','Task Priority','cardPriority','priority','Put 1-9,1 for low and  9 for max');
+        taskEntryForm.appendChild(cardPriority);
+
+        /*
 
         let saveButton = document.createElement('button');
         saveButton.textContent = "Save";      
         saveButton.boardObject = $theBoard;         
 
         saveButton.addEventListener('click',Task.saveTask);        
-        cardForm.appendChild(saveButton);
+        taskEntryForm.appendChild(saveButton);
+        */
 
+               
+        let saveButton = document.createElement('button');
+        saveButton.innerHTML = '<i class="fa fa-check fa-2x"></i>';
+        saveButton.setAttribute('class','save-task-icon');
+        //saveButton.boardObject = $theBoard; 
+        //saveButton.addEventListener('click',Task.saveTask,false);
+        saveButton.addEventListener('click',function(){Task.saveTask($theBoard);},false);
 
-
+        taskEntryForm.appendChild(saveButton);
+                
+              
+        
 
 
         $theBoard.boardLane.appendChild(taskEntryForm);
