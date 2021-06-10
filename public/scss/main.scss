@@ -2,6 +2,14 @@
 Ref : the button styles are copied from bootstrap 
 https://getbootstrap.com/docs/5.0/components/buttons/
 */
+/* 1-col = 5% */
+.row { width: 100%; border: 0px solid red; display: flex;}
+.col-1 { width: 8%;}
+.col-2 { width: 16%;}
+.col-3 { width: 24%;}
+.col-9 { width: 72%}
+.col-10 { width: 80%}
+.col-11 { width: 88%}
 
 .btn {
   display: inline-block;

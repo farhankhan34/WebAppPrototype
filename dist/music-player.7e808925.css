@@ -1,5 +1,5 @@
 .player-div {
-  border: 3px solid blue;
+  border: 1px solid black;
   border-radius: 12px;
   margin: 1rem;
 }
@@ -13,23 +13,12 @@
   justify-content: center;
 }
 
-.details {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
+.track-details {
+  margin-top: 1em;
 }
 
 .track-art {
-  /*
-  margin: 25px;
-  height: 250px;
-  width: 250px;
-  */
-  background-image: URL("https://source.unsplash.com/Qrspubmx6kE/640x360");
-  background-size: cover;
-  background-position: center;
-  border-radius: 15%;
+  vertical-align: top;
 }
 
 /* Changing the font sizes to suitable ones */
@@ -38,11 +27,11 @@
 }
 
 .track-name {
-  font-size: 3rem;
+  font-size: 1.7rem;
 }
 
 .track-artist {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 /* Using flex with the row direction to
@@ -71,16 +60,17 @@
 
 /* Define the slider width so that it scales properly */
 .slider_container {
-  width: 75%;
-  max-width: 400px;
+  width: 98%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 /* Modify the appearance of the slider */
-.seek_slider,
+/*
+.music-time-slider,
 .volume_slider {
+
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -90,9 +80,10 @@
   -webkit-transition: 0.2s;
   transition: opacity 0.2s;
 }
-
+*/
 /* Modify the appearance of the slider thumb */
-.seek_slider::-webkit-slider-thumb,
+/*
+.music-time-slider::-webkit-slider-thumb,
 .volume_slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -103,14 +94,14 @@
   cursor: pointer;
   border-radius: 50%;
 }
-
+*/
 /* Change the opacity when mouse is hovered */
-.seek_slider:hover,
+.music-time-slider:hover,
 .volume_slider:hover {
   opacity: 1;
 }
 
-.seek_slider {
+.music-time-slider {
   width: 60%;
 }
 

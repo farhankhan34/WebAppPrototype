@@ -48,6 +48,7 @@ export default class Board {
     addMusicPlayer(){
         this.musicPlayer = new MusicPlayer(this);
         this.musicPlayer.render();
+        this.musicPlayer.loadTrack(0);
     }
 
     addDictionary(){

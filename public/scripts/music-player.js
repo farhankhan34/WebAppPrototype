@@ -5,47 +5,32 @@ The code is recycled from the above source
 export default class MusicPlayer {
     
     static thePlayer;
+    static duration
 
-    static PlayPauseTrack(){
-        
+  
+    static PlayPauseTrack($thePlayer){      
+         //Only one music play in the system; Single Pattern        
         if(!MusicPlayer.thePlayer) {
             MusicPlayer.thePlayer = new MusicPlayer();
         }
-        MusicPlayer.thePlayer.playpauseTrack();
-
+        //MusicPlayer.thePlayer.playPauseTrack();
+        $thePlayer.playPauseTrack();
     }
+    
 
     constructor($board)
-        {
-            let $theMusicPlayer = this;
-            this.board = $board;
-
-            // Select all the elements in the HTML page
-                // and assign them to a variable
-                this.now_playing = document.querySelector(".now-playing");
-                this.track_art = document.querySelector(".track-art");
-                this.track_name = document.querySelector(".track-name");
-                this.track_artist = document.querySelector(".track-artist");
-
-                this.playpause_btn = document.querySelector(".playpause-track");
-                this.next_btn = document.querySelector(".next-track");
-                this.prev_btn = document.querySelector(".prev-track");
-
-                this.seek_slider = document.querySelector(".seek_slider");
-                this.volume_slider = document.querySelector(".volume_slider");
-                this.curr_time = document.querySelector(".current-time");
-                this.total_duration = document.querySelector(".total-duration");
-
-              
+        {           
+            
+                MusicPlayer.thePlayer = this;
+                this.board = $board;
+            
                   // Specify globally used values
-                 this.track_index = 0;
+                 this.trackIndex = 0;
                  this.isPlaying = false;
                  this.updateTimer = 0;
           
 
-                // Create the audio element for the player
-                this.curr_track = document.createElement('audio');
-
+                
                 // Define the list of tracks that have to be played
                 this.track_list = [
                     {
@@ -68,24 +53,33 @@ export default class MusicPlayer {
                       },
                 ];
 
-                this.loadTrack(this.track_index);
+              //  this.loadTrack(this.track_index);
 
         }
 
         loadTrack(track_index) {
+            this.trackIndex =track_index;
+            console.log('Loading track ..' + this.trackIndex);
             // Clear the previous seek timer
             clearInterval(this.updateTimer);
             this.resetValues();
             
             // Load a new track
-            this.curr_track.src = this.track_list[track_index].path;
-            this.curr_track.load();
+            this.currentTrack.src = this.track_list[this.trackIndex].path;
+            this.currentTrack.load();
+            
+            var x = this.currentTrack;
+            console.log('Duration = ' + x.duration);
+
+           
             
             // Update details of the track
-            this.track_art.style.backgroundImage = "url(" + this.track_list[track_index].image + ")";
-            this.track_name.textContent = this.track_list[track_index].name;
-            this.track_artist.textContent = this.track_list[track_index].artist;
-            this.now_playing.textContent = "PLAYING " + (this.track_index + 1) + " OF " + this.track_list.length;
+            //this.track_art.style.backgroundImage = "url(" + this.track_list[track_index].image + ")";
+            this.trackName.textContent = this.track_list[this.trackIndex].name;
+            this.trackArtist.textContent = this.track_list[this.trackIndex].artist;
+
+            
+            //this.now_playing.textContent = "PLAYING " + (this.track_index + 1) + " OF " + this.track_list.length;
             
             // Set an interval of 1000 milliseconds
             // for updating the seek slider
@@ -93,38 +87,25 @@ export default class MusicPlayer {
             
             // Move to the next track if the current finishes playing
             // using the 'ended' event
-            this.curr_track.addEventListener("ended", function(){MusicPlayer.thePlayer.nextTrack;});
+            this.currentTrack.addEventListener("ended", function(){MusicPlayer.thePlayer.nextTrack;});
             
             
             
-            // Apply a random background color
-            this.random_bg_color();
+           
             }
             
-      random_bg_color() {
-            // Get a random number between 64 to 256
-            // (for getting lighter colors)
-            let red = Math.floor(Math.random() * 256) + 64;
-            let green = Math.floor(Math.random() * 256) + 64;
-            let blue = Math.floor(Math.random() * 256) + 64;
-            
-            // Construct a color withe the given values
-            let bgColor = "rgb(" + red + ", " + green + ", " + blue + ")";
-            
-            // Set the background to the new color            
-            var $thePlayer = document.getElementById('deco-player');
-            $thePlayer.style.background = bgColor;
-            }
+     
             
             // Function to reset all values to their default
      resetValues() {
-        this.curr_time.textContent = "00:00";
-        this.total_duration.textContent = "00:00";
-        this.seek_slider.value = 0;
+        this.currentTime.textContent = "00:00";
+        this.totalDuration.textContent = "00:00";
+        this.sliderRange.value = 0;
+        
             }
      
             
-    playpauseTrack() {
+    playPauseTrack() {       
                 // Switch between playing and pausing
                 // depending on the current state
                 if (!this.isPlaying) this.playTrack();
@@ -132,76 +113,77 @@ export default class MusicPlayer {
                 }
                 
     playTrack() {
+      
                 // Play the loaded track
-                this.curr_track.play();
+                this.currentTrack.play();
                 this.isPlaying = true;
                 
                 // Replace icon with the pause icon
-                this.playpause_btn.innerHTML = '<i class="fa fa-pause-circle fa-5x"></i>';
+                this.playpauseTrack.innerHTML = '<i class="fa fa-pause-circle fa-3x"></i>';
                 }
                 
     pauseTrack() {
                 // Pause the loaded track
-                this.curr_track.pause();
+                this.currentTrack.pause();
                 this.isPlaying = false;
                 
                 // Replace icon with the play icon
-                this.playpause_btn.innerHTML = '<i class="fa fa-play-circle fa-5x"></i>';;
+                this.playpauseTrack.innerHTML = '<i class="fa fa-play-circle fa-3x"></i>';
                 }
                 
-    nextTrack() {
+    static nextTrack() {
                 // Go back to the first track if the
                 // current one is the last in the track list
-                if (this.track_index < this.track_list.length - 1)
-                    this.track_index += 1;
-                else this.track_index = 0;
+                if (MusicPlayer.thePlayer.trackIndex < MusicPlayer.thePlayer.track_list.length - 1)
+                MusicPlayer.thePlayer.trackIndex += 1;
+                else MusicPlayer.thePlayer.trackIndex = 0;
                 
                 // Load and play the new track
-                loadTrack(this.track_index);
-                playTrack();
+                MusicPlayer.thePlayer.loadTrack(MusicPlayer.thePlayer.trackIndex);
+                MusicPlayer.thePlayer.playTrack();
                 }
                 
-    prevTrack() {
+    static prevTrack() {
                 // Go back to the last track if the
                 // current one is the first in the track list
-                if (this.track_index > 0)
-                this.track_index -= 1;
-                else this.track_index = this.track_list.length;
+                if (MusicPlayer.thePlayer.trackIndex > 0)
+                MusicPlayer.thePlayer.trackIndex -= 1;
+                else MusicPlayer.thePlayer.trackIndex = MusicPlayer.thePlayer.track_list.length;
                 
                 // Load and play the new track
-                loadTrack(this.track_index);
-                playTrack();
+                MusicPlayer.thePlayer.loadTrack(MusicPlayer.thePlayer.trackIndex);
+                MusicPlayer.thePlayer.playTrack();
                 }
     
     seekTo() {        
                     // Calculate the seek position by the
                     // percentage of the seek slider
                     // and get the relative duration to the track
-                    this.seekto = this.curr_track.duration * (this.seek_slider.value / 100);
+                    this.seekto = this.currentTrack.duration * (this.sliderRange.value / 100);
                     
                     // Set the current track position to the calculated seek position
-                    this.curr_track.currentTime = this.seekto;
+                    this.currentTrack.currentTime = this.seekto;
                     }
                     
     setVolume() {
                     // Set the volume according to the
                     // percentage of the volume slider set
-                    this.curr_track.volume = this.volume_slider.value / 100;
+                    this.currentTrack.volume = this.volume_slider.value / 100;
                     }
                     
     seekUpdate() {
                     let seekPosition = 0;
                                      
                     // 
-                    if (MusicPlayer.thePlayer && !isNaN(MusicPlayer.thePlayer.curr_track.duration)) {
-                        seekPosition = MusicPlayer.thePlayer.curr_track.currentTime * (100 / MusicPlayer.thePlayer.curr_track.duration);
-                        MusicPlayer.thePlayer.seek_slider.value = seekPosition;
+                    if ( MusicPlayer.duration && !isNaN( MusicPlayer.duration)) {
+                        seekPosition = MusicPlayer.thePlayer.currentTrack.currentTime * (100 /  MusicPlayer.duration);
+                        MusicPlayer.thePlayer.sliderRange.value = seekPosition;
                     
                         // Calculate the time left and the total duration
-                        let currentMinutes = Math.floor(MusicPlayer.thePlayer.curr_track.currentTime / 60);
-                        let currentSeconds = Math.floor(MusicPlayer.thePlayer.curr_track.currentTime - currentMinutes * 60);
-                        let durationMinutes = Math.floor(MusicPlayer.thePlayer.curr_track.duration / 60);
-                        let durationSeconds = Math.floor(MusicPlayer.thePlayer.curr_track.duration - durationMinutes * 60);
+                        let currentMinutes = Math.floor(MusicPlayer.thePlayer.currentTrack.currentTime / 60);
+                        let currentSeconds = Math.floor(MusicPlayer.thePlayer.currentTrack.currentTime - currentMinutes * 60);
+                        let durationMinutes = Math.floor(MusicPlayer.thePlayer.currentTrack.duration / 60);
+                        let durationSeconds = Math.floor(MusicPlayer.thePlayer.currentTrack.duration - durationMinutes * 60);
                     
                         // Add a zero to the single digit time values
                         if (currentSeconds < 10) { currentSeconds = "0" + currentSeconds; }
@@ -210,33 +192,102 @@ export default class MusicPlayer {
                         if (durationMinutes < 10) { durationMinutes = "0" + durationMinutes; }
                     
                         // Display the updated duration
-                        MusicPlayer.thePlayer.curr_time.textContent = currentMinutes + ":" + currentSeconds;
-                        MusicPlayer.thePlayer.total_duration.textContent = durationMinutes + ":" + durationSeconds;
+                        MusicPlayer.thePlayer.currentTime.textContent = currentMinutes + ":" + currentSeconds;
+                        MusicPlayer.thePlayer.totalDuration.textContent = durationMinutes + ":" + durationSeconds;
                      }
                 }
                     
-
+  
  
     render()  {      
 
-        
+        // Create the audio element for the player
+        this.currentTrack = new Audio(); // document.createElement('audio');
+      //  this.currentTrack.setAttribute("controls", "controls");
+
+        let track = this.currentTrack;
+        this.currentTrack.addEventListener('loadedmetadata', function(event){
+            MusicPlayer.duration = track.duration;
+            console.log("Duration 1 = " + track.duration );
+        });
+       
+
+
         let musicPlayerDiv =  document.createElement('div');
         musicPlayerDiv.setAttribute('class','player-div');
-        //musicPlayerDiv.setAttribute('id',this.taskID);
-       // let Text = document.createElement('h3');
-       // Text.textContent = "Music Player will be shown in here!";
-       // musicPlayerDiv.appendChild(Text);
+        
+        let rowOne = document.createElement('div');
+        rowOne.setAttribute('class','row');
 
-        var $thePlayer = document.getElementById('deco-player');
-        //console.log($thePlayer);
-        let $theClone = $thePlayer.cloneNode(true);
-        musicPlayerDiv.appendChild($theClone);
-        $thePlayer.remove();
+        this.playpauseTrack=document.createElement('div') ;
+        this.playpauseTrack.setAttribute('class','col-1 playpause-track');
+        this.playpauseTrack.setAttribute('id','playpauseTrack');
+        this.playpauseTrack.innerHTML = '<i class="fa fa-play-circle fa-3x"></i>';
+        let $thePlayer = this;
+        this.playpauseTrack.addEventListener('click',function(){ MusicPlayer.PlayPauseTrack($thePlayer);},false);        
 
+       
+
+        let detailsBlock = document.createElement('div');
+        detailsBlock.setAttribute('class','col-11 track-details');
+
+        this.trackName = document.createElement('div');
+        this.trackName.setAttribute('class','track-name');
+        detailsBlock.appendChild(this.trackName);
+
+        this.trackArtist = document.createElement('div');
+        this.trackArtist.setAttribute('class','track-artist');
+        detailsBlock.appendChild(this.trackArtist);
+
+        detailsBlock.appendChild(this.currentTrack);
+
+        /************** player seek slider ********/
+        
+        this.seekSlider = document.createElement('div');
+        this.seekSlider.setAttribute('class','slider_container');
+
+        this.prevTrack = document.createElement('div');
+        this.prevTrack.innerHTML = '<i class="fa fa-step-backward fa-1x"></i>';
+        this.prevTrack.addEventListener('click',function(){ MusicPlayer.prevTrack();},false);  
+
+        
+
+        this.currentTime = document.createElement('div');
+        this.currentTime.setAttribute('class','current-time');
+
+        this.sliderRange = document.createElement('input');
+        this.sliderRange.setAttribute('type','range');
+        this.sliderRange.setAttribute('min','1');
+        this.sliderRange.setAttribute('max','100');
+        this.sliderRange.setAttribute('class','music-time-slider');
+      
+        this.totalDuration = document.createElement('div');
+        this.totalDuration.setAttribute('class','total-duration');
+
+        this.nextTrack = document.createElement('div');
+        this.nextTrack.innerHTML = '<i class="fa fa-step-forward fa-1x"></i>';
+        this.nextTrack.addEventListener('click',function(){ MusicPlayer.nextTrack();},false);  
+
+
+        this.seekSlider.appendChild(this.prevTrack);
+        this.seekSlider.appendChild(this.currentTime);
+        this.seekSlider.appendChild(this.sliderRange);
+        this.seekSlider.appendChild(this.totalDuration);
+        this.seekSlider.appendChild(this.nextTrack);
+
+        detailsBlock.appendChild(this.seekSlider);
+
+      
+        rowOne.appendChild(this.playpauseTrack);
+        rowOne.appendChild(detailsBlock);
+        musicPlayerDiv.appendChild(rowOne);
+
+       
         this.board.toolBoxSection.appendChild(musicPlayerDiv); 
 
         /* event binding */
         //playpauseTrack
+        /*
         let $playpauseTrack = document.getElementById('playpauseTrack');
         playpauseTrack.addEventListener('click',MusicPlayer.PlayPauseTrack,false);        
 
@@ -245,6 +296,7 @@ export default class MusicPlayer {
         $seek_slider.onchange = function($event){          
             MusicPlayer.thePlayer.seekTo();
         };
+        */
         
 
     }
