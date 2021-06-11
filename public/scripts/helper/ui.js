@@ -55,4 +55,23 @@ export default class UI {
         return heroLine;
     }
 
+    static formatTimeElapsed( seconds) {
+         // let ampm = hrs >= 12 ? "PM" : "AM";
+           // hrs = hrs % 12;
+           // hrs = hrs ? hrs : 12;
+
+           let secs = seconds % 60;
+           secs = secs.toFixed(0);
+
+           let minits = Math.floor(seconds/60);
+           let mins = minits % 60;
+           let hrs = Math.floor(minits/60);
+
+           mins = mins < 10 ? '0'+mins : mins;
+           secs = secs < 10 ? '0'+secs : secs;
+
+           let formattedTime = hrs + ":" + mins + ":" + secs ;
+          return formattedTime;
+    }
+
 }

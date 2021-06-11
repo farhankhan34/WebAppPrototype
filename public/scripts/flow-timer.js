@@ -1,3 +1,4 @@
+import UI from './helper/ui';
 import Database from './service/database';
 import Task from './task';
 
@@ -13,6 +14,7 @@ export default class FlowTimer {
         setInterval(FlowTimer.tick, 1000)
     }
 
+    
     static tick(){
          
   
@@ -22,8 +24,8 @@ export default class FlowTimer {
         
 
         if(FlowTimer.$stopWatchState == 'running') {
-            FlowTimer.$stopWatchTime++;
-            theDisplay.innerHTML = FlowTimer.$stopWatchTime;
+            FlowTimer.$stopWatchTime++;            
+            theDisplay.innerHTML = UI.formatTimeElapsed( FlowTimer.$stopWatchTime);
            // theAMPM.setAttribute('class','hidden');
         }
         else{

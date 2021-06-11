@@ -147,8 +147,13 @@ export default class Task {
         this.priority = $priority;
         this.completionStatus = $completionStatus;
         this.board = $board;
-        this.startTime = $startTime;
-        this.endTime = $endTime;
+
+        if($startTime ) {
+            this.startTime = new Date($startTime);
+        }
+        if($endTime  ) {
+            this.endTime =  new Date($endTime);
+        }
 
         
         if( $taskID > 0 ) {
@@ -179,15 +184,17 @@ export default class Task {
 
    
     toggleView(){
-       if(this.showingDetails == true) {        
+        //console.log(" this.showingDetails = " + this.showingDetails);
+
+       if(this.showingDetails == false) {        
         this.detailsButton.innerHTML ='<i class="fa fa-angle-up fa-2x"></i>';
         this.detailsBlock.setAttribute('class','task-details-block');
-        this.showingDetails = false;
+        this.showingDetails = true;
        }
        else{
         this.detailsButton.innerHTML ='<i class="fa fa-angle-down fa-2x"></i>';        
         this.detailsBlock.setAttribute('class','hidden');
-        this.showingDetails = true;
+        this.showingDetails = false;
        }
 
        
@@ -196,10 +203,10 @@ export default class Task {
     calcTimeSpent(){      
          
         if(this.startTime && this.endTime && (typeof this.startTime.getTime === 'function') && (typeof this.endTime.getTime === 'function') ){
-            var Difference_In_Time =    this.endTime.getTime() - this.startTime.getTime();
-            var Difference_In_Minutes = Difference_In_Time / 1000 ;
-            if(Math.ceil(Difference_In_Minutes)> 0) {
-                this.timeSpent.innerHTML = Math.ceil(Difference_In_Minutes) + "  Seconds";          
+            var Difference_In_Time =    (this.endTime.getTime() - this.startTime.getTime())/1000;
+            
+            if(Math.ceil(Difference_In_Time)> 0) {
+                this.timeSpent.innerHTML = UI.formatTimeElapsed(Difference_In_Time) ;
             }
             else {
                 this.timeSpent.innerHTML = "";
@@ -285,8 +292,12 @@ export default class Task {
 
         this.detailsBlock.appendChild(taskDate);
         this.detailsBlock.appendChild(taskETA);
-        this.detailsBlock.appendChild(taskStartTime);
-        this.detailsBlock.appendChild(taskEndTime);
+        if( this.startTime ) {
+            this.detailsBlock.appendChild(taskStartTime);
+        }
+        if(this.endTime){
+            this.detailsBlock.appendChild(taskEndTime);
+        }
         taskDiv.appendChild(this.detailsBlock);
 
         this.board.tasks.appendChild(taskDiv);
@@ -314,7 +325,7 @@ export default class Task {
         this.calcTimeSpent();
     }
 
-    /*
+    
     unRender() {
         let $domBoardID = '#B\\:' + this.board.boardID + " .all-tasks";
         var tasksDOM = document.querySelector($domBoardID);
@@ -331,7 +342,7 @@ export default class Task {
         this.unRender();
         this.render();
     }
-    */
+    
 
 
   static taskAddForm($theBoard){

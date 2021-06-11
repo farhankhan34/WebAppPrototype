@@ -258,6 +258,22 @@ var UI = /*#__PURE__*/function () {
       heroLine.appendChild(heroText);
       return heroLine;
     }
+  }, {
+    key: "formatTimeElapsed",
+    value: function formatTimeElapsed(seconds) {
+      // let ampm = hrs >= 12 ? "PM" : "AM";
+      // hrs = hrs % 12;
+      // hrs = hrs ? hrs : 12;
+      var secs = seconds % 60;
+      secs = secs.toFixed(0);
+      var minits = Math.floor(seconds / 60);
+      var mins = minits % 60;
+      var hrs = Math.floor(minits / 60);
+      mins = mins < 10 ? '0' + mins : mins;
+      secs = secs < 10 ? '0' + secs : secs;
+      var formattedTime = hrs + ":" + mins + ":" + secs;
+      return formattedTime;
+    }
   }]);
 
   return UI;
@@ -300,8 +316,14 @@ var Task = /*#__PURE__*/function () {
     this.priority = $priority;
     this.completionStatus = $completionStatus;
     this.board = $board;
-    this.startTime = $startTime;
-    this.endTime = $endTime;
+
+    if ($startTime) {
+      this.startTime = new Date($startTime);
+    }
+
+    if ($endTime) {
+      this.endTime = new Date($endTime);
+    }
 
     if ($taskID > 0) {
       // Let use stored task id
@@ -333,25 +355,25 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "toggleView",
     value: function toggleView() {
-      if (this.showingDetails == true) {
+      //console.log(" this.showingDetails = " + this.showingDetails);
+      if (this.showingDetails == false) {
         this.detailsButton.innerHTML = '<i class="fa fa-angle-up fa-2x"></i>';
         this.detailsBlock.setAttribute('class', 'task-details-block');
-        this.showingDetails = false;
+        this.showingDetails = true;
       } else {
         this.detailsButton.innerHTML = '<i class="fa fa-angle-down fa-2x"></i>';
         this.detailsBlock.setAttribute('class', 'hidden');
-        this.showingDetails = true;
+        this.showingDetails = false;
       }
     }
   }, {
     key: "calcTimeSpent",
     value: function calcTimeSpent() {
       if (this.startTime && this.endTime && typeof this.startTime.getTime === 'function' && typeof this.endTime.getTime === 'function') {
-        var Difference_In_Time = this.endTime.getTime() - this.startTime.getTime();
-        var Difference_In_Minutes = Difference_In_Time / 1000;
+        var Difference_In_Time = (this.endTime.getTime() - this.startTime.getTime()) / 1000;
 
-        if (Math.ceil(Difference_In_Minutes) > 0) {
-          this.timeSpent.innerHTML = Math.ceil(Difference_In_Minutes) + "  Seconds";
+        if (Math.ceil(Difference_In_Time) > 0) {
+          this.timeSpent.innerHTML = _ui.default.formatTimeElapsed(Difference_In_Time);
         } else {
           this.timeSpent.innerHTML = "";
         }
@@ -425,8 +447,15 @@ var Task = /*#__PURE__*/function () {
       taskDiv.appendChild(toolBar);
       this.detailsBlock.appendChild(taskDate);
       this.detailsBlock.appendChild(taskETA);
-      this.detailsBlock.appendChild(taskStartTime);
-      this.detailsBlock.appendChild(taskEndTime);
+
+      if (this.startTime) {
+        this.detailsBlock.appendChild(taskStartTime);
+      }
+
+      if (this.endTime) {
+        this.detailsBlock.appendChild(taskEndTime);
+      }
+
       taskDiv.appendChild(this.detailsBlock);
       this.board.tasks.appendChild(taskDiv);
       /* ******************** ADD EVENT HANDLERS *************************************/
@@ -454,25 +483,25 @@ var Task = /*#__PURE__*/function () {
 
       this.calcTimeSpent();
     }
-    /*
-    unRender() {
-        let $domBoardID = '#B\\:' + this.board.boardID + " .all-tasks";
-        var tasksDOM = document.querySelector($domBoardID);
-        if(tasksDOM){
-             tasksDOM.innerHTML = '';
-        }
-        else{
-            console.log('unrendered failed at line 315');
-        }
-        //this.board.tasks.innerHTML = '';
-    }
-    
-    reRender() {
-        this.unRender();
-        this.render();
-    }
-    */
+  }, {
+    key: "unRender",
+    value: function unRender() {
+      var $domBoardID = '#B\\:' + this.board.boardID + " .all-tasks";
+      var tasksDOM = document.querySelector($domBoardID);
 
+      if (tasksDOM) {
+        tasksDOM.innerHTML = '';
+      } else {
+        console.log('unrendered failed at line 315');
+      } //this.board.tasks.innerHTML = '';
+
+    }
+  }, {
+    key: "reRender",
+    value: function reRender() {
+      this.unRender();
+      this.render();
+    }
   }], [{
     key: "getAllTask",
     value:
@@ -943,8 +972,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /*
-Code reference : https://www.geeksforgeeks.org/create-a-music-player-using-javascript/
-The code is recycled from the above source
+Dictionary : https://dictionaryapi.dev/
 */
 var Dictionary = /*#__PURE__*/function () {
   function Dictionary($board) {
@@ -966,8 +994,10 @@ var Dictionary = /*#__PURE__*/function () {
       var searchInput = document.createElement('input');
       searchInput.setAttribute('id', 'search-input');
       searchInput.setAttribute('class', 'search-input');
-      searchInput.setAttribute('placeholder', 'Type here ...');
+      searchInput.setAttribute('placeholder', 'Search here ...');
       searchBox.appendChild(searchInput);
+      var searchFunctionButtons = document.createElement('div');
+      searchFunctionButtons.setAttribute('class', 'search-box-buttons');
       /*  creating search button */
 
       var searchButton = document.createElement('button');
@@ -975,26 +1005,29 @@ var Dictionary = /*#__PURE__*/function () {
       searchButton.setAttribute('class', 'search-icon');
       searchButton.taskObject = this;
       searchButton.addEventListener('click', Dictionary.lookUp, false);
-      searchBox.appendChild(searchButton);
+      searchFunctionButtons.appendChild(searchButton);
       var clearButton = document.createElement('button');
       clearButton.innerHTML = '<i class="fa fa-times fa-2x"></i>';
       clearButton.setAttribute('class', 'search-icon');
       clearButton.taskObject = this;
       clearButton.addEventListener('click', Dictionary.clearSearchBox, false);
-      searchBox.appendChild(clearButton);
+      searchFunctionButtons.appendChild(clearButton);
+      searchBox.appendChild(searchFunctionButtons);
       dictionaryDiv.appendChild(searchBox);
       /* search results display box */
 
       var searchResults = document.createElement('div');
       searchResults.setAttribute('id', 'search-results');
-      searchResults.setAttribute('class', 'search-results');
+      searchResults.setAttribute('class', 'search-results hidden');
       dictionaryDiv.appendChild(searchResults);
       this.board.toolBoxSection.appendChild(dictionaryDiv);
     }
   }], [{
     key: "lookUp",
     value: function lookUp() {
-      var $searchInput = document.getElementById("search-input"); // alert('You are look for : '+  $searchInput.value  );
+      var $searchInput = document.getElementById("search-input");
+      var $searchResults = document.getElementById("search-results");
+      $searchResults.setAttribute('class', 'search-results'); // alert('You are look for : '+  $searchInput.value  );
 
       var $dictionaryEndPoint = "https://api.dictionaryapi.dev/api/v2/entries/en_US/" + $searchInput.value;
       var $request = new XMLHttpRequest();
@@ -1055,6 +1088,8 @@ var Dictionary = /*#__PURE__*/function () {
     value: function clearSearchBox() {
       var $searchInput = document.getElementById("search-input");
       $searchInput.value = '';
+      var $searchResults = document.getElementById("search-results");
+      $searchResults.setAttribute('class', 'hidden');
     }
   }]);
 
@@ -1071,6 +1106,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _ui = _interopRequireDefault(require("./helper/ui"));
 
 var _database = _interopRequireDefault(require("./service/database"));
 
@@ -1142,7 +1179,7 @@ var FlowTimer = /*#__PURE__*/function () {
 
       if (FlowTimer.$stopWatchState == 'running') {
         FlowTimer.$stopWatchTime++;
-        theDisplay.innerHTML = FlowTimer.$stopWatchTime; // theAMPM.setAttribute('class','hidden');
+        theDisplay.innerHTML = _ui.default.formatTimeElapsed(FlowTimer.$stopWatchTime); // theAMPM.setAttribute('class','hidden');
       } else {
         var dateTime = new Date();
         var hrs = dateTime.getHours();
@@ -1207,7 +1244,7 @@ _defineProperty(FlowTimer, "$theFlowTimer", void 0);
 _defineProperty(FlowTimer, "$stopWatchState", 'stop');
 
 _defineProperty(FlowTimer, "$stopWatchTime", 0);
-},{"./service/database":"scripts/service/database.js","./task":"scripts/task.js"}],"scripts/board.js":[function(require,module,exports) {
+},{"./helper/ui":"scripts/helper/ui.js","./service/database":"scripts/service/database.js","./task":"scripts/task.js"}],"scripts/board.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2205,7 +2242,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57897" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51689" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

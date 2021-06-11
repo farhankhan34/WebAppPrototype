@@ -1,6 +1,5 @@
 /*
-Code reference : https://www.geeksforgeeks.org/create-a-music-player-using-javascript/
-The code is recycled from the above source
+Dictionary : https://dictionaryapi.dev/
 */
 export default class Dictionary {
     
@@ -8,6 +7,8 @@ export default class Dictionary {
 
    static lookUp(){
        let $searchInput = document.getElementById("search-input");
+       let $searchResults = document.getElementById("search-results");             
+       $searchResults.setAttribute('class','search-results');
 
       // alert('You are look for : '+  $searchInput.value  );
        let $dictionaryEndPoint = "https://api.dictionaryapi.dev/api/v2/entries/en_US/" + $searchInput.value;
@@ -75,12 +76,15 @@ export default class Dictionary {
  static AddElementToSearchResult($parentElement, $elementType , $textContent, $label){
      let $elementToAdd = document.createElement($elementType);
      $elementToAdd.textContent = $label + ": " + $textContent;
-     $parentElement.appendChild($elementToAdd);
+     $parentElement.appendChild($elementToAdd);   
  }
 
     static clearSearchBox(){
        let $searchInput = document.getElementById("search-input");
         $searchInput.value = '';
+
+        let $searchResults = document.getElementById("search-results");        
+        $searchResults.setAttribute('class','hidden');    
     }
 
     constructor($board)
@@ -105,8 +109,11 @@ export default class Dictionary {
         let searchInput =  document.createElement('input');
         searchInput.setAttribute('id','search-input')
         searchInput.setAttribute('class','search-input')
-        searchInput.setAttribute('placeholder','Type here ...');
+        searchInput.setAttribute('placeholder','Search here ...');
         searchBox.appendChild(searchInput);
+
+        let searchFunctionButtons =  document.createElement('div');
+        searchFunctionButtons.setAttribute('class','search-box-buttons');
 
         /*  creating search button */
         let searchButton = document.createElement('button');
@@ -114,21 +121,22 @@ export default class Dictionary {
         searchButton.setAttribute('class','search-icon');
         searchButton.taskObject = this;
         searchButton.addEventListener('click',Dictionary.lookUp,false);
-        searchBox.appendChild(searchButton);
+        searchFunctionButtons.appendChild(searchButton);
         
         let clearButton = document.createElement('button');
         clearButton.innerHTML ='<i class="fa fa-times fa-2x"></i>';
         clearButton.setAttribute('class','search-icon');
         clearButton.taskObject = this;
         clearButton.addEventListener('click',Dictionary.clearSearchBox,false);
-        searchBox.appendChild(clearButton);
+        searchFunctionButtons.appendChild(clearButton);
 
+        searchBox.appendChild(searchFunctionButtons);
         dictionaryDiv.appendChild(searchBox);
 
         /* search results display box */
         let searchResults =  document.createElement('div');
         searchResults.setAttribute('id','search-results')
-        searchResults.setAttribute('class','search-results');
+        searchResults.setAttribute('class','search-results hidden');
         dictionaryDiv.appendChild(searchResults);
 
         this.board.toolBoxSection.appendChild(dictionaryDiv);
