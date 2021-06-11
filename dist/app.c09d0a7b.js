@@ -292,7 +292,7 @@ var Task = /*#__PURE__*/function () {
   /************************************************************************
    *      specific to the object instances                                *
    *                                                                      */
-  function Task($taskID, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
+  function Task($taskID, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $startTime, $endTime, $board) {
     _classCallCheck(this, Task);
 
     this.taskName = $taskName, this.dueDate = $dueDate, this.eta = $eta;
@@ -300,6 +300,8 @@ var Task = /*#__PURE__*/function () {
     this.priority = $priority;
     this.completionStatus = $completionStatus;
     this.board = $board;
+    this.startTime = $startTime;
+    this.endTime = $endTime;
 
     if ($taskID > 0) {
       // Let use stored task id
@@ -309,8 +311,6 @@ var Task = /*#__PURE__*/function () {
       this.taskID = _database.default.getNextTaskID();
     }
 
-    this.startTime = 0;
-    this.endTime = 0;
     this.showingDetails = false;
   }
 
@@ -326,8 +326,8 @@ var Task = /*#__PURE__*/function () {
         "completionTime": this.completionTime,
         "priority": this.priority,
         "completionStatus": this.completionStatus,
-        "lastStartTime": this.startTime,
-        "lastEndTime": this.endTime
+        "startTime": this.startTime,
+        "endTime": this.endTime
       };
     }
   }, {
@@ -342,6 +342,22 @@ var Task = /*#__PURE__*/function () {
         this.detailsBlock.setAttribute('class', 'hidden');
         this.showingDetails = true;
       }
+    }
+  }, {
+    key: "calcTimeSpent",
+    value: function calcTimeSpent() {
+      if (this.startTime && this.endTime && typeof this.startTime.getTime === 'function' && typeof this.endTime.getTime === 'function') {
+        var Difference_In_Time = this.endTime.getTime() - this.startTime.getTime();
+        var Difference_In_Minutes = Difference_In_Time / 1000;
+
+        if (Math.ceil(Difference_In_Minutes) > 0) {
+          this.timeSpent.innerHTML = Math.ceil(Difference_In_Minutes) + "  Seconds";
+        } else {
+          this.timeSpent.innerHTML = "";
+        }
+      }
+
+      return this.timeSpent.innerHTML;
     }
   }, {
     key: "render",
@@ -373,7 +389,8 @@ var Task = /*#__PURE__*/function () {
       deleteButton.innerHTML = '<i class="fa fa-times fa-2x"></i>';
       var heroText = document.createElement('span');
       heroText.setAttribute('class', 'hero-text');
-      heroText.textContent = this.taskName + " ID :" + this.taskID;
+      heroText.textContent = this.taskName; //+ " ID :" + this.taskID; for debug
+
       this.detailsBlock = document.createElement('div');
 
       if (this.showingDetails == true) {
@@ -394,9 +411,14 @@ var Task = /*#__PURE__*/function () {
       taskStartTime.textContent = "Start time: " + this.startTime;
       var taskEndTime = document.createElement('p');
       taskEndTime.textContent = "End time: " + this.endTime;
+      this.timeSpent = document.createElement('span');
+      this.timeSpent.setAttribute('class', 'task-time-spent');
+      var timeSpentId = 'timespent_' + this.taskID;
+      this.timeSpent.setAttribute('id', timeSpentId);
       /************* add to dom  **********************/
 
       heroLine.appendChild(heroText);
+      heroLine.appendChild(this.timeSpent);
       toolBar.appendChild(this.detailsButton);
       toolBar.appendChild(deleteButton);
       taskDiv.appendChild(heroLine);
@@ -429,18 +451,28 @@ var Task = /*#__PURE__*/function () {
         //const result = Task.allTasks.filter(task => task.taskID == $event.target.id);
         //console.log(JSON.stringify(result));            
       };
+
+      this.calcTimeSpent();
     }
-  }, {
-    key: "unRender",
-    value: function unRender() {
-      this.board.tasks.innerHTML = '';
+    /*
+    unRender() {
+        let $domBoardID = '#B\\:' + this.board.boardID + " .all-tasks";
+        var tasksDOM = document.querySelector($domBoardID);
+        if(tasksDOM){
+             tasksDOM.innerHTML = '';
+        }
+        else{
+            console.log('unrendered failed at line 315');
+        }
+        //this.board.tasks.innerHTML = '';
     }
-  }, {
-    key: "reRender",
-    value: function reRender() {
-      this.unRender();
-      this.render();
+    
+    reRender() {
+        this.unRender();
+        this.render();
     }
+    */
+
   }], [{
     key: "getAllTask",
     value:
@@ -457,7 +489,7 @@ var Task = /*#__PURE__*/function () {
 
         var $board = _board.default.getBoardById($task.boardID);
 
-        var $newTask = new Task($task.taskID, $task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus, $board);
+        var $newTask = new Task($task.taskID, $task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus, $task.startTime, $task.endTime, $board);
         $newTask.render();
         Task.allTasks.push($newTask);
       }
@@ -467,9 +499,9 @@ var Task = /*#__PURE__*/function () {
     value: function isDoing() {
       Task.doingSomething = false;
       Task.allTasks.forEach(function (task) {
-        console.log(task.board.boardID);
+        console.log('Checking borad id of task = ' + task.board.boardID + ": Task ->" + task.taskID);
 
-        if (task.board.boardID == 2) {
+        if (task.board.boardID === 2) {
           Task.doingSomething = true;
         }
 
@@ -536,7 +568,7 @@ var Task = /*#__PURE__*/function () {
 
       /* create a new task using the supplied info */
 
-      var newTask = new Task(0, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board);
+      var newTask = new Task(0, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, 0, 0, $board);
       /* add the newly created task into the task list */
 
       Task.allTasks.push(newTask);
@@ -646,6 +678,11 @@ var MusicPlayer = /*#__PURE__*/function () {
     this.updateTimer = 0; // Define the list of tracks that have to be played
 
     this.track_list = [{
+      name: "Shipping Lanes",
+      artist: "Chad Crouch",
+      image: "https://images.pexels.com/photos/1717969/pexels-photo-1717969.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
+      path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3"
+    }, {
       name: "Night Owl",
       artist: "Broke For Free",
       image: "https://images.pexels.com/photos/2264753/pexels-photo-2264753.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
@@ -655,11 +692,6 @@ var MusicPlayer = /*#__PURE__*/function () {
       artist: "Tours",
       image: "https://images.pexels.com/photos/3100835/pexels-photo-3100835.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
       path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3"
-    }, {
-      name: "Shipping Lanes",
-      artist: "Chad Crouch",
-      image: "https://images.pexels.com/photos/1717969/pexels-photo-1717969.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=250&w=250",
-      path: "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3"
     }]; //  this.loadTrack(this.track_index);
   }
 
@@ -1040,6 +1072,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
+var _database = _interopRequireDefault(require("./service/database"));
+
 var _task = _interopRequireDefault(require("./task"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -1141,16 +1175,20 @@ var FlowTimer = /*#__PURE__*/function () {
         FlowTimer.$stopWatchTime = 0;
         FlowTimer.$stopWatchState = 'running';
         $me.startStopButton.textContent = "Stop";
-        $me.taskDetails.innerHTML = $runningTask.taskName + " - Recording";
-        $runningTask.reRender();
+        $me.taskDetails.innerHTML = $runningTask.taskName;
       } else {
         $runningTask.endTime = new Date();
         FlowTimer.$stopWatchTime = 0;
         FlowTimer.$stopWatchState = 'stop';
         $me.startStopButton.textContent = "Start";
-        $me.taskDetails.innerHTML = $runningTask.taskName + " - Stopped";
-        $runningTask.reRender();
+        $me.taskDetails.innerHTML = $runningTask.taskName;
       }
+
+      var timeSpentId = 'timespent_' + $runningTask.taskID;
+      var domElem = document.getElementById(timeSpentId);
+      domElem.innerHTML = $runningTask.calcTimeSpent(); // $runningTask.reRender();
+
+      _database.default.updateTask($runningTask);
     }
   }, {
     key: "stopWatch",
@@ -1169,7 +1207,7 @@ _defineProperty(FlowTimer, "$theFlowTimer", void 0);
 _defineProperty(FlowTimer, "$stopWatchState", 'stop');
 
 _defineProperty(FlowTimer, "$stopWatchTime", 0);
-},{"./task":"scripts/task.js"}],"scripts/board.js":[function(require,module,exports) {
+},{"./service/database":"scripts/service/database.js","./task":"scripts/task.js"}],"scripts/board.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1281,23 +1319,27 @@ var Board = /*#__PURE__*/function () {
 
         if ($event.target.getAttribute('data-web-app') == "board") {
           var $taskDomID = $event.dataTransfer.getData("Text");
+          var $taskID = Number($taskDomID.replace('T:', ''));
           var $taskElement = document.getElementById($taskDomID);
-          $event.target.appendChild($taskElement);
-          $taskElement.style.opacity = "1";
-          console.log("Task DOM ID " + $taskDomID);
-          var $taskID = Number($taskDomID.replace('T:', '')); //finally attache the new board object with the task
 
           var $taskOnMove = _task.default.allTasks.filter(function (task) {
             return task.taskID == $taskID;
           });
 
-          $taskOnMove[0].board = $theBoard; //$taskOnMove[0].storeTask();
+          $taskElement.style.opacity = "1";
 
-          _database.default.createTask($taskOnMove[0]);
+          if ($theBoard.boardID == 2 && _task.default.isDoing()) {
+            alert('You can work only on one task at a time!');
+            return false;
+          }
+
+          $taskOnMove[0].board = $theBoard;
+          $event.target.appendChild($taskElement);
+
+          _database.default.updateTask($taskOnMove[0]);
         } else {
-          var _$taskDomID = $event.dataTransfer.getData("Text");
+          var _$taskDomID = $event.dataTransfer.getData("Text"); //console.log("Task DOM id " + $taskDomID);             
 
-          console.log("Task DOM id " + _$taskDomID);
 
           var _$taskElement = document.getElementById(_$taskDomID);
 
@@ -2114,9 +2156,9 @@ var _board = _interopRequireDefault(require("./board"));
 
 var _task = _interopRequireDefault(require("./task"));
 
-require("regenerator-runtime/runtime");
-
 var _database = _interopRequireDefault(require("./service/database"));
+
+require("regenerator-runtime/runtime");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2135,7 +2177,7 @@ $doing.addDictionary();
 $doing.addMusicPlayer();
 
 _task.default.getAllTask();
-},{"./board":"scripts/board.js","./task":"scripts/task.js","regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js","./service/database":"scripts/service/database.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./board":"scripts/board.js","./task":"scripts/task.js","./service/database":"scripts/service/database.js","regenerator-runtime/runtime":"../node_modules/regenerator-runtime/runtime.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -2163,7 +2205,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58714" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57897" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

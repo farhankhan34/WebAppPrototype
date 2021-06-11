@@ -67,7 +67,6 @@
 
 .task-entry-form {
   width: 95%;
-  border: 3px solid #83c093;
   display: inline-block;
   position: relative;
   margin: 1rem;
@@ -76,7 +75,9 @@
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s linear;
-  background-image: linear-gradient(120deg, #fbc2eb 0%, #a6c1ee 100%);
+  background-image: linear-gradient(120deg, #1f1f1f 0%, #383838 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  color: #ffffff;
 }
 .task-entry-form .task-toolbar {
   width: auto;
@@ -97,9 +98,11 @@
 .task-entry-form div label {
   padding-left: 5px;
   min-width: 30%;
+  color: #ffffff;
 }
 .task-entry-form div input {
   background-color: transparent;
+  color: #ffffff;
   border: none;
   outline: none;
   line-height: 1em;
@@ -168,5 +171,10 @@
     outline: 0;
   }
   */
+.task-time-spent {
+  float: right;
+  font-size: 1.7em;
+  margin-top: 3px;
+}
 
 /*# sourceMappingURL=/task.a901eff1.css.map */

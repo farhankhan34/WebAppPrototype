@@ -114,6 +114,7 @@ export default class Board {
         /* add a placeholder for the all tasks */
         this.tasks =  document.createElement('div');
         this.tasks.setAttribute('class','all-tasks droptarget');
+       
         //this.tasks.innerHTML =  "Put all tasks in here!";
 
         this.boardLane.appendChild(this.tasks);
@@ -128,24 +129,31 @@ export default class Board {
             //console.log($event.target.getAttribute('data-web-app'));
             $event.preventDefault();
             if ( $event.target.getAttribute('data-web-app') == "board" ) {
+
+              
+                
               
               let $taskDomID = $event.dataTransfer.getData("Text");
-              let $taskElement = document.getElementById($taskDomID);
-              $event.target.appendChild($taskElement);
-              $taskElement.style.opacity = "1";
-               
-              console.log("Task DOM ID " + $taskDomID);
-
               let $taskID = Number($taskDomID.replace('T:',''));
-              //finally attache the new board object with the task
+              let $taskElement = document.getElementById($taskDomID);
               const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
-              $taskOnMove[0].board = $theBoard;
-              //$taskOnMove[0].storeTask();
-              Database.createTask($taskOnMove[0]);   
+              $taskElement.style.opacity = "1";             
+                                                      
+              
+              if($theBoard.boardID == 2 &&  Task.isDoing() ) {
+                     alert('You can work only on one task at a time!'); 
+                     return false;
+               }
+              
+                $taskOnMove[0].board = $theBoard; 
+                $event.target.appendChild($taskElement);                
+                Database.updateTask($taskOnMove[0]);   
+                                         
+               
             }
             else{
                 let $taskDomID = $event.dataTransfer.getData("Text");
-                console.log("Task DOM id " + $taskDomID);             
+                //console.log("Task DOM id " + $taskDomID);             
                 let $taskElement = document.getElementById($taskDomID);              
                 $taskElement.style.opacity = "1";
                 return false;

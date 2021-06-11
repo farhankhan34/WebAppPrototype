@@ -1,3 +1,4 @@
+import Database from './service/database';
 import Task from './task';
 
 export default class FlowTimer {
@@ -58,21 +59,23 @@ export default class FlowTimer {
             FlowTimer.$stopWatchTime = 0;
             FlowTimer.$stopWatchState = 'running';
             $me.startStopButton.textContent = "Stop";            
-            $me.taskDetails.innerHTML = $runningTask.taskName + " - Recording";
-
-            $runningTask.reRender();
+            $me.taskDetails.innerHTML = $runningTask.taskName ;
+            
         }
         else{
             $runningTask.endTime = new Date();
             FlowTimer.$stopWatchTime = 0;
             FlowTimer.$stopWatchState = 'stop';
             $me.startStopButton.textContent = "Start";
-            $me.taskDetails.innerHTML = $runningTask.taskName + " - Stopped";
-
-            $runningTask.reRender();
+            $me.taskDetails.innerHTML = $runningTask.taskName ;            
         }
 
+        let timeSpentId = 'timespent_' + $runningTask.taskID;
+        let domElem = document.getElementById(timeSpentId);
+        domElem.innerHTML =  $runningTask.calcTimeSpent();
 
+       // $runningTask.reRender();
+        Database.updateTask($runningTask);
     }
 
     static stopWatch(){ 

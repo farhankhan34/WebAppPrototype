@@ -1,7 +1,7 @@
 import Board from './board';
 import Task from './task';
-import 'regenerator-runtime/runtime';
 import Database from './service/database';
+import 'regenerator-runtime/runtime';
  
 
  let $toDo = Board.add('Todo');

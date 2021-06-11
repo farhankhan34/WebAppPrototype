@@ -19,7 +19,16 @@ export default class Task {
         for ( const $taskIndex in $tasks) {                     
             let $task = $tasks[$taskIndex];
             let $board = Board.getBoardById($task.boardID);
-            var $newTask = new Task($task.taskID, $task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus, $board);            
+            var $newTask = new Task($task.taskID, 
+                                    $task.taskName, 
+                                    $task.dueDate, 
+                                    $task.eta,  
+                                    $task.completionTime,   
+                                    $task.priority,  
+                                    $task.completionStatus, 
+                                    $task.startTime,
+                                    $task.endTime,
+                                    $board);            
             $newTask.render();            
             Task.allTasks.push($newTask);
           }                 
@@ -28,9 +37,9 @@ export default class Task {
 
    static isDoing(){
     Task.doingSomething = false;
-    Task.allTasks.forEach(function(task){
-        console.log(task.board.boardID);
-        if(task.board.boardID == 2 ) { Task.doingSomething = true;  };
+    Task.allTasks.forEach(function(task){        
+         console.log('Checking borad id of task = ' + task.board.boardID + ": Task ->" + task.taskID);
+         if(task.board.boardID === 2 ) {  Task.doingSomething = true;  }; 
       });
      return Task.doingSomething;
    }
@@ -99,6 +108,8 @@ export default class Task {
                                         $completionTime, 
                                         $priority, 
                                         $completionStatus,
+                                        0,
+                                        0,
                                         $board);
 
                 /* add the newly created task into the task list */        
@@ -125,6 +136,8 @@ export default class Task {
         $completionTime, 
         $priority, 
         $completionStatus,
+        $startTime,
+        $endTime,
         $board)
         {
         this.taskName = $taskName,
@@ -134,6 +147,9 @@ export default class Task {
         this.priority = $priority;
         this.completionStatus = $completionStatus;
         this.board = $board;
+        this.startTime = $startTime;
+        this.endTime = $endTime;
+
         
         if( $taskID > 0 ) {
             // Let use stored task id
@@ -143,8 +159,6 @@ export default class Task {
             // Let Database service give us the unique task id             
             this.taskID = Database.getNextTaskID();            
         }
-        this.startTime = 0;
-        this.endTime = 0;
         this.showingDetails = false;
         
         }
@@ -158,8 +172,8 @@ export default class Task {
             "completionTime": this.completionTime ,
             "priority": this.priority ,
             "completionStatus": this.completionStatus,
-            "lastStartTime": this.startTime,
-            "lastEndTime": this.endTime,
+            "startTime": this.startTime,
+            "endTime": this.endTime,
         }
     }
 
@@ -177,6 +191,22 @@ export default class Task {
        }
 
        
+    }
+
+    calcTimeSpent(){      
+         
+        if(this.startTime && this.endTime && (typeof this.startTime.getTime === 'function') && (typeof this.endTime.getTime === 'function') ){
+            var Difference_In_Time =    this.endTime.getTime() - this.startTime.getTime();
+            var Difference_In_Minutes = Difference_In_Time / 1000 ;
+            if(Math.ceil(Difference_In_Minutes)> 0) {
+                this.timeSpent.innerHTML = Math.ceil(Difference_In_Minutes) + "  Seconds";          
+            }
+            else {
+                this.timeSpent.innerHTML = "";
+            }
+
+        }
+        return this.timeSpent.innerHTML;
     }
 
     render()  {
@@ -211,7 +241,7 @@ export default class Task {
       
         let heroText = document.createElement('span');
         heroText.setAttribute('class','hero-text');
-        heroText.textContent = this.taskName + " ID :" + this.taskID;
+        heroText.textContent = this.taskName ;  //+ " ID :" + this.taskID; for debug
         
         this.detailsBlock = document.createElement('div');
         if(this.showingDetails == true) {
@@ -238,10 +268,15 @@ export default class Task {
         taskEndTime.textContent = "End time: " + this.endTime;
 
 
-
+        this.timeSpent = document.createElement('span') ;
+        this.timeSpent.setAttribute('class','task-time-spent');
+        let timeSpentId = 'timespent_' + this.taskID;
+        this.timeSpent.setAttribute('id',timeSpentId);
 
         /************* add to dom  **********************/
         heroLine.appendChild(heroText);
+        heroLine.appendChild(this.timeSpent);
+
         toolBar.appendChild(this.detailsButton);
         toolBar.appendChild(deleteButton);
 
@@ -276,17 +311,28 @@ export default class Task {
             //console.log(JSON.stringify(result));            
         };
         
-
+        this.calcTimeSpent();
     }
 
+    /*
     unRender() {
-        this.board.tasks.innerHTML = '';
+        let $domBoardID = '#B\\:' + this.board.boardID + " .all-tasks";
+        var tasksDOM = document.querySelector($domBoardID);
+        if(tasksDOM){
+             tasksDOM.innerHTML = '';
+        }
+        else{
+            console.log('unrendered failed at line 315');
+        }
+        //this.board.tasks.innerHTML = '';
     }
     
     reRender() {
         this.unRender();
         this.render();
     }
+    */
+
 
   static taskAddForm($theBoard){
       
