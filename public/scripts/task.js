@@ -8,8 +8,9 @@ export default class Task {
      *      static is common to all instances since they're called          *
      *      on the class itself.                                            */
     
-
+    
     static allTasks = [];
+    static doingSomething = false;
    
     /************* get all tasks from persistent store *****************/
     static getAllTask(){
@@ -18,12 +19,21 @@ export default class Task {
         for ( const $taskIndex in $tasks) {                     
             let $task = $tasks[$taskIndex];
             let $board = Board.getBoardById($task.boardID);
-            var $newTask = new Task($task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus, $board);
-            $newTask.render();
+            var $newTask = new Task($task.taskID, $task.taskName, $task.dueDate, $task.eta,  $task.completionTime,   $task.priority,  $task.completionStatus, $board);            
+            $newTask.render();            
             Task.allTasks.push($newTask);
-          }         
-         
+          }                 
+        
     }
+
+   static isDoing(){
+    Task.doingSomething = false;
+    Task.allTasks.forEach(function(task){
+        console.log(task.board.boardID);
+        if(task.board.boardID == 2 ) { Task.doingSomething = true;  };
+      });
+     return Task.doingSomething;
+   }
 
     static renderAll(){
        // let container = document.getElementById();
@@ -44,9 +54,11 @@ export default class Task {
     static removeTask($taskObject){        
         
 
-        let yes = confirm("Do you want to delete Task '" + $taskObject.taskName + "?");
+        let $yes = confirm("Do you want to delete Task '" + $taskObject.taskName + " ID " + $taskObject.taskID + "?");
 
-        if(yes == true)  {   
+        //alert(yes);
+
+        if($yes == true)  {   
             const result = Task.allTasks.filter(task => task.taskID != $taskObject.taskID);
             Task.unrenderAll();
             Task.allTasks = result;
@@ -80,7 +92,8 @@ export default class Task {
 
         // let $board =  $event.currentTarget.boardObject;
          /* create a new task using the supplied info */
-              var newTask = new Task(   $taskName, 
+              var newTask = new Task(   0,
+                                        $taskName, 
                                         $dueDate, 
                                         $eta, 
                                         $completionTime, 
@@ -105,6 +118,7 @@ export default class Task {
      *      specific to the object instances                                *
      *                                                                      */
     constructor(
+        $taskID,
         $taskName, 
         $dueDate, 
         $eta, 
@@ -120,8 +134,15 @@ export default class Task {
         this.priority = $priority;
         this.completionStatus = $completionStatus;
         this.board = $board;
-        // Give a unique id for each task
-        this.taskID = Number(Task.allTasks.length + 1 ) ;
+        
+        if( $taskID > 0 ) {
+            // Let use stored task id
+            this.taskID = $taskID;
+        }
+        else { 
+            // Let Database service give us the unique task id             
+            this.taskID = Database.getNextTaskID();            
+        }
         this.startTime = 0;
         this.endTime = 0;
         this.showingDetails = false;
@@ -159,7 +180,7 @@ export default class Task {
     }
 
     render()  {
-        this.sesameOpen = true;
+        
         let taskDiv =  document.createElement('div');
         taskDiv.setAttribute('class','card');
         let $domTaskID = 'T:' + this.taskID;
@@ -176,7 +197,12 @@ export default class Task {
 
         this.detailsButton = document.createElement('button');
         this.detailsButton.setAttribute('class','btn-icon');       
-        this.detailsButton.innerHTML ='<i class="fa fa-angle-up fa-2x"></i>';
+        if(this.showingDetails == true) { 
+            this.detailsButton.innerHTML ='<i class="fa fa-angle-up fa-2x"></i>';
+        }
+        else{
+            this.detailsButton.innerHTML ='<i class="fa fa-angle-down fa-2x"></i>';        
+        }
         
         let deleteButton = document.createElement('button');
         deleteButton.setAttribute('class','btn-icon');
@@ -185,10 +211,15 @@ export default class Task {
       
         let heroText = document.createElement('span');
         heroText.setAttribute('class','hero-text');
-        heroText.textContent = this.taskName;
+        heroText.textContent = this.taskName + " ID :" + this.taskID;
         
         this.detailsBlock = document.createElement('div');
-        this.detailsBlock.setAttribute('class','task-details-block');
+        if(this.showingDetails == true) {
+            this.detailsBlock.setAttribute('class','task-details-block');
+        }
+        else{
+            this.detailsBlock.setAttribute('class','hidden');
+        }
 
         /************ Task details are shown here *************/
         let taskDate = document.createElement('p');
@@ -316,6 +347,11 @@ export default class Task {
         //saveButton.boardObject = $theBoard; 
         //saveButton.addEventListener('click',Task.saveTask,false);
         saveButton.addEventListener('click',function(){Task.saveTask($theBoard);},false);
+
+        deleteButton.addEventListener('click',function(){
+            var element = document.getElementById("taskEntryForm");
+            element.parentNode.removeChild(element);
+            },false);
 
         taskEntryForm.appendChild(saveButton);
                 

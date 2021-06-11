@@ -59,7 +59,7 @@ export default class MusicPlayer {
 
         loadTrack(track_index) {
             this.trackIndex =track_index;
-            console.log('Loading track ..' + this.trackIndex);
+            //console.log('Loading track ..' + this.trackIndex);
             // Clear the previous seek timer
             clearInterval(this.updateTimer);
             this.resetValues();
@@ -68,8 +68,8 @@ export default class MusicPlayer {
             this.currentTrack.src = this.track_list[this.trackIndex].path;
             this.currentTrack.load();
             
-            var x = this.currentTrack;
-            console.log('Duration = ' + x.duration);
+           // var x = this.currentTrack;
+           // console.log('Duration = ' + x.duration);
 
            
             
@@ -208,7 +208,7 @@ export default class MusicPlayer {
         let track = this.currentTrack;
         this.currentTrack.addEventListener('loadedmetadata', function(event){
             MusicPlayer.duration = track.duration;
-            console.log("Duration 1 = " + track.duration );
+            //console.log("Duration 1 = " + track.duration );
         });
        
 

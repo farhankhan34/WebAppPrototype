@@ -16,20 +16,32 @@ export default class FlowTimer {
          
   
 
-        let theDisplay = document.getElementById("clock-display");
+        let theDisplay = document.getElementById("clock-display-digits");
+       // let theAMPM = document.getElementById("clock-display-ampm");
         
 
         if(FlowTimer.$stopWatchState == 'running') {
             FlowTimer.$stopWatchTime++;
             theDisplay.innerHTML = FlowTimer.$stopWatchTime;
+           // theAMPM.setAttribute('class','hidden');
         }
         else{
             let dateTime = new Date();
             let hrs = dateTime.getHours();
             let mins = dateTime.getMinutes();
             let secs = dateTime.getSeconds();
-            let time = hrs + ":" + mins + ":" + secs  ;
+
+           // let ampm = hrs >= 12 ? "PM" : "AM";
+           // hrs = hrs % 12;
+           // hrs = hrs ? hrs : 12;
+
+            mins = mins < 10 ? '0'+mins : mins;
+            secs = secs < 10 ? '0'+secs : secs;
+
+            let time = hrs + ":" + mins + ":" + secs ;
             theDisplay.innerHTML = time;
+          //  theAMPM.setAttribute('class','am-pm col-1');
+          //  theAMPM.innerHTML =   ampm ; 
         }
   
     //    console.log(JSON.stringify(dateTime));
@@ -83,7 +95,20 @@ export default class FlowTimer {
         let clockDisplay =  document.createElement('div');
         clockDisplay.setAttribute('id','clock-display');       
         clockDisplay.setAttribute('class','clock-display') ;       
+       
+        let clockDigits =  document.createElement('div');
+        clockDigits.setAttribute('id','clock-display-digits');       
+        clockDigits.setAttribute('class','digits') ;       
+
+        let ampmDisplay =  document.createElement('div');
+        ampmDisplay.setAttribute('id','clock-display-ampm');       
+        ampmDisplay.setAttribute('class','am-pm') ;       
+        timerDiv.appendChild(ampmDisplay);
+
+       // clockDisplay.appendChild(ampmDisplay);    
+        clockDisplay.appendChild(clockDigits);        
         timerDiv.appendChild(clockDisplay);
+
            
         /*  creating start and stop buttons for stop watch */
         
@@ -99,23 +124,7 @@ export default class FlowTimer {
         toolboxDiv.appendChild(this.startStopButton);
         timerDiv.appendChild(toolboxDiv);
 
-        /*
-        let stopButton = document.createElement('button');
-        stopButton.textContent = "Stop";
-        stopButton.taskObject = this;
-        stopButton.setAttribute('class','btn btn-stop');
-        stopButton.addEventListener('click',FlowTimer.stopStopWatch,false);
-        timerDiv.appendChild(stopButton);
-        */
-        
-
-        /* search results display box */
-        /*
-        let searchResults =  document.createElement('div');
-        searchResults.setAttribute('id','search-results')
-        searchResults.setAttribute('class','search-results');
-        dictionaryDiv.appendChild(searchResults);
-        */
+       
         this.board.toolBoxSection.appendChild(timerDiv);
 
     }

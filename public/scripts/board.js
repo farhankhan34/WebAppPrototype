@@ -1,3 +1,4 @@
+import Database from './service/database';
 import Task from './task';
 import MusicPlayer from './music-player';
 import Dictionary from './dictionary';
@@ -25,8 +26,10 @@ export default class Board {
           );
     }  
 
-    static taskAddUI($event){
-        //alert($event.currentTarget.boardObject.name);
+    static taskAddUI($event){        
+        if($event.currentTarget.boardObject.boardID == 2) {
+            if( Task.isDoing()) { alert('You can work only on one task at a time!'); return false;}
+        }
         Task.taskAddForm($event.currentTarget.boardObject);
         
     }
@@ -68,12 +71,17 @@ export default class Board {
  /* add a swimline (column) as a board */
         this.boardLane =  document.createElement('div');
         let $domBoardID = 'B:' + this.boardID;
-        this.boardLane.setAttribute('id',$domBoardID);        
-        this.boardLane.setAttribute('class','board');
+        this.boardLane.setAttribute('id',$domBoardID);                
+        this.boardLane.setAttribute('class', 'board ' + this.name);
 
         //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
         this.boardLane.setAttribute('data-web-app','board');
        
+      /* add a label for the board */ 
+      let boardLabel =  document.createElement('div');
+      boardLabel.setAttribute('class','label');
+      boardLabel.innerHTML =  this.name;
+      this.boardLane.appendChild(boardLabel);
 
        /********* add control section   **********/ 
         let controlSection =  document.createElement('div');
@@ -81,11 +89,7 @@ export default class Board {
         this.boardLane.appendChild(controlSection);
 
 
-        /* add a label for the board */ 
-        let boardLabel =  document.createElement('div');
-        boardLabel.setAttribute('class','label');
-        boardLabel.innerHTML =  this.name;
-        controlSection.appendChild(boardLabel);
+  
         
 
         /* add a Task Add button for the board */
@@ -136,7 +140,8 @@ export default class Board {
               //finally attache the new board object with the task
               const $taskOnMove = Task.allTasks.filter(task => task.taskID == $taskID);
               $taskOnMove[0].board = $theBoard;
-              $taskOnMove[0].storeTask();
+              //$taskOnMove[0].storeTask();
+              Database.createTask($taskOnMove[0]);   
             }
             else{
                 let $taskDomID = $event.dataTransfer.getData("Text");

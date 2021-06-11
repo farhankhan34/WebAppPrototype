@@ -25,14 +25,13 @@
 .task-hero {
   display: inline-table;
   width: 70%;
-  border: 0px solid red;
+  padding-top: 13px;
 }
 
 .task-toolbar {
   display: inline-table;
   width: auto;
   text-align: right;
-  border: 0px solid blue;
   padding: 1rem;
   float: right;
 }

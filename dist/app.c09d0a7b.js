@@ -131,6 +131,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var Database = /*#__PURE__*/function () {
   function Database() {
     _classCallCheck(this, Database);
@@ -166,13 +168,24 @@ var Database = /*#__PURE__*/function () {
       while (i--) {
         var $taskKey = keys[i];
         var $task = JSON.parse(localStorage.getItem($taskKey));
-        taskList.push($task);
-        console.log("Key = " + $taskKey);
-        console.log($task);
-        console.log($task.boardID);
+        Database.updateUniqueTaskID($task.taskID);
+        taskList.push($task); //console.log("Key = " + $taskKey );
+        //console.log($task);
+        //console.log($task.boardID);
       }
 
       return taskList;
+    }
+  }, {
+    key: "updateUniqueTaskID",
+    value: function updateUniqueTaskID($newID) {
+      if (Database.nextTaskID <= Number($newID)) Database.nextTaskID = Number($newID) + 1;
+    }
+  }, {
+    key: "getNextTaskID",
+    value: function getNextTaskID() {
+      Database.nextTaskID++;
+      return Database.nextTaskID;
     }
   }]);
 
@@ -180,6 +193,8 @@ var Database = /*#__PURE__*/function () {
 }();
 
 exports.default = Database;
+
+_defineProperty(Database, "nextTaskID", Number(1));
 },{}],"scripts/helper/ui.js":[function(require,module,exports) {
 "use strict";
 
@@ -277,16 +292,23 @@ var Task = /*#__PURE__*/function () {
   /************************************************************************
    *      specific to the object instances                                *
    *                                                                      */
-  function Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
+  function Task($taskID, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board) {
     _classCallCheck(this, Task);
 
     this.taskName = $taskName, this.dueDate = $dueDate, this.eta = $eta;
     this.completionTime = $completionTime;
     this.priority = $priority;
     this.completionStatus = $completionStatus;
-    this.board = $board; // Give a unique id for each task
+    this.board = $board;
 
-    this.taskID = Number(Task.allTasks.length + 1);
+    if ($taskID > 0) {
+      // Let use stored task id
+      this.taskID = $taskID;
+    } else {
+      // Let Database service give us the unique task id             
+      this.taskID = _database.default.getNextTaskID();
+    }
+
     this.startTime = 0;
     this.endTime = 0;
     this.showingDetails = false;
@@ -324,7 +346,6 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "render",
     value: function render() {
-      this.sesameOpen = true;
       var taskDiv = document.createElement('div');
       taskDiv.setAttribute('class', 'card');
       var $domTaskID = 'T:' + this.taskID;
@@ -340,16 +361,28 @@ var Task = /*#__PURE__*/function () {
       toolBar.setAttribute('class', 'task-toolbar');
       this.detailsButton = document.createElement('button');
       this.detailsButton.setAttribute('class', 'btn-icon');
-      this.detailsButton.innerHTML = '<i class="fa fa-angle-up fa-2x"></i>';
+
+      if (this.showingDetails == true) {
+        this.detailsButton.innerHTML = '<i class="fa fa-angle-up fa-2x"></i>';
+      } else {
+        this.detailsButton.innerHTML = '<i class="fa fa-angle-down fa-2x"></i>';
+      }
+
       var deleteButton = document.createElement('button');
       deleteButton.setAttribute('class', 'btn-icon');
       deleteButton.innerHTML = '<i class="fa fa-times fa-2x"></i>';
       var heroText = document.createElement('span');
       heroText.setAttribute('class', 'hero-text');
-      heroText.textContent = this.taskName;
+      heroText.textContent = this.taskName + " ID :" + this.taskID;
       this.detailsBlock = document.createElement('div');
-      this.detailsBlock.setAttribute('class', 'task-details-block');
+
+      if (this.showingDetails == true) {
+        this.detailsBlock.setAttribute('class', 'task-details-block');
+      } else {
+        this.detailsBlock.setAttribute('class', 'hidden');
+      }
       /************ Task details are shown here *************/
+
 
       var taskDate = document.createElement('p');
       taskDate.textContent = "Due date: " + this.dueDate;
@@ -424,10 +457,25 @@ var Task = /*#__PURE__*/function () {
 
         var $board = _board.default.getBoardById($task.boardID);
 
-        var $newTask = new Task($task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus, $board);
+        var $newTask = new Task($task.taskID, $task.taskName, $task.dueDate, $task.eta, $task.completionTime, $task.priority, $task.completionStatus, $board);
         $newTask.render();
         Task.allTasks.push($newTask);
       }
+    }
+  }, {
+    key: "isDoing",
+    value: function isDoing() {
+      Task.doingSomething = false;
+      Task.allTasks.forEach(function (task) {
+        console.log(task.board.boardID);
+
+        if (task.board.boardID == 2) {
+          Task.doingSomething = true;
+        }
+
+        ;
+      });
+      return Task.doingSomething;
     }
   }, {
     key: "renderAll",
@@ -448,9 +496,9 @@ var Task = /*#__PURE__*/function () {
   }, {
     key: "removeTask",
     value: function removeTask($taskObject) {
-      var yes = confirm("Do you want to delete Task '" + $taskObject.taskName + "?");
+      var $yes = confirm("Do you want to delete Task '" + $taskObject.taskName + " ID " + $taskObject.taskID + "?"); //alert(yes);
 
-      if (yes == true) {
+      if ($yes == true) {
         var result = Task.allTasks.filter(function (task) {
           return task.taskID != $taskObject.taskID;
         });
@@ -488,7 +536,7 @@ var Task = /*#__PURE__*/function () {
 
       /* create a new task using the supplied info */
 
-      var newTask = new Task($taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board);
+      var newTask = new Task(0, $taskName, $dueDate, $eta, $completionTime, $priority, $completionStatus, $board);
       /* add the newly created task into the task list */
 
       Task.allTasks.push(newTask);
@@ -549,6 +597,10 @@ var Task = /*#__PURE__*/function () {
       saveButton.addEventListener('click', function () {
         Task.saveTask($theBoard);
       }, false);
+      deleteButton.addEventListener('click', function () {
+        var element = document.getElementById("taskEntryForm");
+        element.parentNode.removeChild(element);
+      }, false);
       taskEntryForm.appendChild(saveButton);
       $theBoard.boardLane.appendChild(taskEntryForm);
     }
@@ -560,6 +612,8 @@ var Task = /*#__PURE__*/function () {
 exports.default = Task;
 
 _defineProperty(Task, "allTasks", []);
+
+_defineProperty(Task, "doingSomething", false);
 },{"./service/database":"scripts/service/database.js","./board":"scripts/board.js","./helper/ui":"scripts/helper/ui.js"}],"scripts/music-player.js":[function(require,module,exports) {
 "use strict";
 
@@ -612,16 +666,16 @@ var MusicPlayer = /*#__PURE__*/function () {
   _createClass(MusicPlayer, [{
     key: "loadTrack",
     value: function loadTrack(track_index) {
-      this.trackIndex = track_index;
-      console.log('Loading track ..' + this.trackIndex); // Clear the previous seek timer
+      this.trackIndex = track_index; //console.log('Loading track ..' + this.trackIndex);
+      // Clear the previous seek timer
 
       clearInterval(this.updateTimer);
       this.resetValues(); // Load a new track
 
       this.currentTrack.src = this.track_list[this.trackIndex].path;
-      this.currentTrack.load();
-      var x = this.currentTrack;
-      console.log('Duration = ' + x.duration); // Update details of the track
+      this.currentTrack.load(); // var x = this.currentTrack;
+      // console.log('Duration = ' + x.duration);
+      // Update details of the track
       //this.track_art.style.backgroundImage = "url(" + this.track_list[track_index].image + ")";
 
       this.trackName.textContent = this.track_list[this.trackIndex].name;
@@ -730,8 +784,7 @@ var MusicPlayer = /*#__PURE__*/function () {
 
       var track = this.currentTrack;
       this.currentTrack.addEventListener('loadedmetadata', function (event) {
-        MusicPlayer.duration = track.duration;
-        console.log("Duration 1 = " + track.duration);
+        MusicPlayer.duration = track.duration; //console.log("Duration 1 = " + track.duration );
       });
       var musicPlayerDiv = document.createElement('div');
       musicPlayerDiv.setAttribute('class', 'player-div');
@@ -1022,6 +1075,15 @@ var FlowTimer = /*#__PURE__*/function () {
       var clockDisplay = document.createElement('div');
       clockDisplay.setAttribute('id', 'clock-display');
       clockDisplay.setAttribute('class', 'clock-display');
+      var clockDigits = document.createElement('div');
+      clockDigits.setAttribute('id', 'clock-display-digits');
+      clockDigits.setAttribute('class', 'digits');
+      var ampmDisplay = document.createElement('div');
+      ampmDisplay.setAttribute('id', 'clock-display-ampm');
+      ampmDisplay.setAttribute('class', 'am-pm');
+      timerDiv.appendChild(ampmDisplay); // clockDisplay.appendChild(ampmDisplay);    
+
+      clockDisplay.appendChild(clockDigits);
       timerDiv.appendChild(clockDisplay);
       /*  creating start and stop buttons for stop watch */
 
@@ -1037,41 +1099,29 @@ var FlowTimer = /*#__PURE__*/function () {
       });
       toolboxDiv.appendChild(this.startStopButton);
       timerDiv.appendChild(toolboxDiv);
-      /*
-      let stopButton = document.createElement('button');
-      stopButton.textContent = "Stop";
-      stopButton.taskObject = this;
-      stopButton.setAttribute('class','btn btn-stop');
-      stopButton.addEventListener('click',FlowTimer.stopStopWatch,false);
-      timerDiv.appendChild(stopButton);
-      */
-
-      /* search results display box */
-
-      /*
-      let searchResults =  document.createElement('div');
-      searchResults.setAttribute('id','search-results')
-      searchResults.setAttribute('class','search-results');
-      dictionaryDiv.appendChild(searchResults);
-      */
-
       this.board.toolBoxSection.appendChild(timerDiv);
     }
   }], [{
     key: "tick",
     value: function tick() {
-      var theDisplay = document.getElementById("clock-display");
+      var theDisplay = document.getElementById("clock-display-digits"); // let theAMPM = document.getElementById("clock-display-ampm");
 
       if (FlowTimer.$stopWatchState == 'running') {
         FlowTimer.$stopWatchTime++;
-        theDisplay.innerHTML = FlowTimer.$stopWatchTime;
+        theDisplay.innerHTML = FlowTimer.$stopWatchTime; // theAMPM.setAttribute('class','hidden');
       } else {
         var dateTime = new Date();
         var hrs = dateTime.getHours();
         var mins = dateTime.getMinutes();
-        var secs = dateTime.getSeconds();
+        var secs = dateTime.getSeconds(); // let ampm = hrs >= 12 ? "PM" : "AM";
+        // hrs = hrs % 12;
+        // hrs = hrs ? hrs : 12;
+
+        mins = mins < 10 ? '0' + mins : mins;
+        secs = secs < 10 ? '0' + secs : secs;
         var time = hrs + ":" + mins + ":" + secs;
-        theDisplay.innerHTML = time;
+        theDisplay.innerHTML = time; //  theAMPM.setAttribute('class','am-pm col-1');
+        //  theAMPM.innerHTML =   ampm ; 
       } //    console.log(JSON.stringify(dateTime));
 
     }
@@ -1126,6 +1176,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _database = _interopRequireDefault(require("./service/database"));
 
 var _task = _interopRequireDefault(require("./task"));
 
@@ -1182,20 +1234,20 @@ var Board = /*#__PURE__*/function () {
       this.boardLane = document.createElement('div');
       var $domBoardID = 'B:' + this.boardID;
       this.boardLane.setAttribute('id', $domBoardID);
-      this.boardLane.setAttribute('class', 'board'); //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
+      this.boardLane.setAttribute('class', 'board ' + this.name); //Ref : https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
 
       this.boardLane.setAttribute('data-web-app', 'board');
-      /********* add control section   **********/
-
-      var controlSection = document.createElement('div');
-      controlSection.setAttribute('class', 'board-controls');
-      this.boardLane.appendChild(controlSection);
       /* add a label for the board */
 
       var boardLabel = document.createElement('div');
       boardLabel.setAttribute('class', 'label');
       boardLabel.innerHTML = this.name;
-      controlSection.appendChild(boardLabel);
+      this.boardLane.appendChild(boardLabel);
+      /********* add control section   **********/
+
+      var controlSection = document.createElement('div');
+      controlSection.setAttribute('class', 'board-controls');
+      this.boardLane.appendChild(controlSection);
       /* add a Task Add button for the board */
 
       /* <input type="button" name="addTask" id="addTask" value="Add"> */
@@ -1239,8 +1291,9 @@ var Board = /*#__PURE__*/function () {
             return task.taskID == $taskID;
           });
 
-          $taskOnMove[0].board = $theBoard;
-          $taskOnMove[0].storeTask();
+          $taskOnMove[0].board = $theBoard; //$taskOnMove[0].storeTask();
+
+          _database.default.createTask($taskOnMove[0]);
         } else {
           var _$taskDomID = $event.dataTransfer.getData("Text");
 
@@ -1279,7 +1332,13 @@ var Board = /*#__PURE__*/function () {
   }, {
     key: "taskAddUI",
     value: function taskAddUI($event) {
-      //alert($event.currentTarget.boardObject.name);
+      if ($event.currentTarget.boardObject.boardID == 2) {
+        if (_task.default.isDoing()) {
+          alert('You can work only on one task at a time!');
+          return false;
+        }
+      }
+
       _task.default.taskAddForm($event.currentTarget.boardObject);
     }
   }, {
@@ -1297,7 +1356,7 @@ var Board = /*#__PURE__*/function () {
 exports.default = Board;
 
 _defineProperty(Board, "allBoards", []);
-},{"./task":"scripts/task.js","./music-player":"scripts/music-player.js","./dictionary":"scripts/dictionary.js","./flow-timer":"scripts/flow-timer.js"}],"../node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
+},{"./service/database":"scripts/service/database.js","./task":"scripts/task.js","./music-player":"scripts/music-player.js","./dictionary":"scripts/dictionary.js","./flow-timer":"scripts/flow-timer.js"}],"../node_modules/regenerator-runtime/runtime.js":[function(require,module,exports) {
 var define;
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
@@ -2104,7 +2163,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54261" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58714" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
